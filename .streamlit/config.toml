@@ -2,3 +2,167 @@
 
 [runner]
 magicEnabled = false
+
+[server]
+runOnSave = true
+headless = true
+
+# ============================================================================
+# Catppuccin Color Palette Theme Configuration for Streamlit
+# Reference: https://docs.streamlit.io/develop/concepts/configuration/theming
+# ============================================================================
+# This configuration allows users to switch between dark (Mocha) and light
+# (Latte) themes through Streamlit's native settings menu.
+# ============================================================================
+
+[theme]
+# Base theme settings (shared across dark and light modes)
+
+font = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+headingFontWeights = [600,500,500,500,500,500]
+headingFontSizes = ["3rem", "2rem"]
+codeFont = "'Space Mono':https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+codeFontSize = ".75rem"
+
+base = "dark"  # Default base theme ("light" or "dark")
+
+# Sidebar border visibility
+showSidebarBorder = true
+
+# Chart colors for Plotly, Altair, and Vega-Lite
+chartCategoricalColors = [
+  "#89b4fa", "#cba6f7", "#f5c2e7", "#f38ba8",
+  "#eba0ac", "#fab387", "#f9e2af", "#a6e3a1",
+  "#94e2d5", "#89dceb", "#74c7ec", "#7287fd"
+]
+
+# ============================================================================
+# MARK: DARK THEME (Catppuccin Mocha)
+# ============================================================================
+[theme.dark]
+# Primary and background colors
+primaryColor = "#89b4fa"                    # Blue
+backgroundColor = "#11111b"                 # Crust
+secondaryBackgroundColor = "#313244"        # Surface 0
+textColor = "#cdd6f4"                       # Text
+
+# Code and dataframe styling
+codeBackgroundColor = "#1e1e2e"             # Base
+codeTextColor = "#a6e3a1"                   # Text
+dataframeHeaderBackgroundColor = "#45475a"  # Surface 1
+dataframeBorderColor = "#6c7086"            # Overlay 0
+
+# Links and borders
+linkColor = "#89b4fa"                       # Blue
+linkUnderline = true
+borderColor = "#6c7086"                     # Overlay 0
+
+# Radius
+baseRadius = "0.5rem"
+buttonRadius = "0.25rem"
+
+# Widget styling
+showWidgetBorder = true
+
+# Color palette (red, orange, yellow, green, blue, violet, gray)
+redColor = "#f38ba8"                        # Red
+orangeColor = "#fab387"                     # Peach
+yellowColor = "#f9e2af"                     # Yellow
+greenColor = "#a6e3a1"                      # Green
+blueColor = "#74c7ec"                       # Sapphire
+violetColor = "#cba6f7"                     # Mauve
+grayColor = "#6c7086"                       # Overlay 0
+
+# ============================================================================
+# MARK: DARK THEME - SIDEBAR
+# ============================================================================
+[theme.dark.sidebar]
+primaryColor = "#89b4fa"                    # Blue
+backgroundColor = "#181825"                 # Crust
+secondaryBackgroundColor = "#45475a"        # Surface 1
+textColor = "#cdd6f4"                       # Text
+borderColor = "#6c7086"                     # Overlay 0
+showWidgetBorder = true
+
+
+# ============================================================================
+# MARK: LIGHT THEME (Catppuccin Latte)
+# ============================================================================
+[theme.light]
+# Primary and background colors
+primaryColor = "#04a5e5"                    # Sky
+backgroundColor = "#dce0e8"                 # Crust
+secondaryBackgroundColor = "#ccd0da"        # Surface 0
+textColor = "#4c4f69"                       # Text
+
+# Code and dataframe styling
+codeBackgroundColor = "#eff1f5"             # Crust
+codeTextColor = "#40a02b"                   # Text
+dataframeHeaderBackgroundColor = "#bcc0cc"  # Surface 1
+dataframeBorderColor = "#9ca0b0"            # Overlay 0
+
+# Links and borders
+linkColor = "#04a5e5"                       # Sky
+linkUnderline = true
+borderColor = "#9ca0b0"                     # Overlay 0
+
+# Radius
+baseRadius = "0.5rem"
+buttonRadius = "0.25rem"
+
+# Widget styling
+showWidgetBorder = true
+
+# Color palette (red, orange, yellow, green, blue, violet, gray)
+redColor = "#d20f39"                        # Red
+orangeColor = "#fe640b"                     # Peach
+yellowColor = "#df8e1d"                     # Yellow
+greenColor = "#40a02b"                      # Green
+blueColor = "#1e66f5"                       # Blue
+violetColor = "#8839ef"                     # Mauve
+grayColor = "#9ca0b0"                       # Overlay 0
+
+# ============================================================================
+# MARK: LIGHT THEME - SIDEBAR
+# ============================================================================
+[theme.light.sidebar]
+primaryColor = "#04a5e5"                    # Sky
+backgroundColor = "#dce0e8"                 # Crust
+secondaryBackgroundColor = "#bcc0cc"        # Surface 1
+textColor = "#4c4f69"                       # Text
+borderColor = "#9ca0b0"                     # Overlay 0
+showWidgetBorder = true
+
+# ============================================================================
+# MARK: CATPPUCCIN COLOR REFERENCE
+# ============================================================================
+# MOCHA (Dark Theme)
+# ============================================================================
+# Primary Accents:
+#   Blue: #89b4fa        Sky: #89dceb       Sapphire: #74c7ec
+#   Mauve: #cba6f7      Lavender: #b4befe
+#
+# Alert Colors:
+#   Red: #f38ba8         Maroon: #eba0ac    Peach: #fab387
+#   Yellow: #f9e2af      Green: #a6e3a1     Teal: #94e2d5
+#
+# Neutral:
+#   Text: #cdd6f4        Subtext1: #bac2de  Subtext0: #a6adc8
+#   Surface2: #585b70    Surface1: #45475a  Surface0: #313244
+#   Base: #1e1e2e        Mantle: #181825    Crust: #11111b
+
+# ============================================================================
+# LATTE (Light Theme)
+# ============================================================================
+# Primary Accents:
+#   Blue: #1e66f5        Sky: #04a5e5       Sapphire: #209fb5
+#   Mauve: #8839ef      Lavender: #7287fd
+#
+# Alert Colors:
+#   Red: #d20f39         Maroon: #e64553    Peach: #fe640b
+#   Yellow: #df8e1d      Green: #40a02b     Teal: #179299
+#
+# Neutral:
+#   Text: #4c4f69        Subtext1: #5c5f77  Subtext0: #6c6f85
+#   Surface2: #acb0be    Surface1: #bcc0cc  Surface0: #ccd0da
+#   Base: #eff1f5        Mantle: #e6e9ef    Crust: #dce0e8

@@ -1,12 +1,12 @@
 import streamlit as st
 
-import app_data_loading
+from app.utils import constants
 
 #region Config
 st.set_page_config(
     page_title="Janus",
     # page_title="...",
-    page_icon="🧬",
+    page_icon=constants.PATH_ASSET_LOGO,
     initial_sidebar_state="expanded",
     menu_items={
         # TODO: add about info (and repo link)
@@ -16,20 +16,18 @@ st.set_page_config(
     },
     layout="wide",
 )
-
-st.session_state["data"] = app_data_loading.init()
+st.logo(constants.PATH_ASSET_LOGO, size="large")
 
 #endregion
 
-st.logo("🧬")
 
 pages = [
-    st.Page("pages/home.py", icon=":material/home:", title="Home"),
-    st.Page("pages/tf_browser.py", icon=":material/view_list:", title="TF Browser"),
-    st.Page("pages/tf_view.py", icon=":material/visibility:", visibility="hidden", title="TF Viewer"),
-    st.Page("pages/tf_compare.py", icon=":material/visibility:", visibility="hidden", title="TF Compare"),
-    st.Page("pages/pattern_explorer.py", icon=":material/regular_expression:", title="Pattern Explorer"),
-    st.Page("pages/about.py", icon=":material/info:", title="About"),
+    st.Page(constants.PATH_PAGE_HOME, icon=":material/home:", title="Home"),
+    st.Page(constants.PATH_PAGE_TF_BROWSER, icon=":material/view_list:", title="TF Browser"),
+    st.Page(constants.PATH_PAGE_TF_VIEW, icon=":material/visibility:", visibility="hidden", title="TF Viewer"),
+    st.Page(constants.PATH_PAGE_TF_COMPARE, icon=":material/visibility:", visibility="hidden", title="TF Compare"),
+    st.Page(constants.PATH_PAGE_PATTERN_EXPLORER, icon=":material/regular_expression:", title="Pattern Explorer"),
+    st.Page(constants.PATH_PAGE_ABOUT, icon=":material/info:", title="About"),
 ]
 pages = st.navigation(pages, position="top")
 pages.run()

@@ -5,17 +5,19 @@ if __name__ == "__main__":
     print("Please import this as a module on the main Streamlit page (app.py).")
     exit()
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from dataclasses import dataclass
+from typing import NamedTuple, Any, Literal
+
 import numpy as np
 import pandas as pd
-from typing import NamedTuple, Any, Literal
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # ============================================================================ #
 
 ScoreName = Literal[
-    "Aiupred", "HI", "AiupredLatest-Disorder", "AiupredLatest-Binding",
-    "AiupredLatest-Linker", "Fldpnn-Disorder", "Fldpnn-ProteinBinding",
+    "HI", "Aiupred-Disorder", "Aiupred-Binding",
+    "Aiupred-Linker", "Fldpnn-Disorder", "Fldpnn-ProteinBinding",
     "Fldpnn-DnaBinding", "Fldpnn-RnaBinding", "Fldpnn-Linker",
     "Metapredict-Disorder"
 ]
@@ -28,125 +30,53 @@ class Score(NamedTuple):
     color: str
     fillcolor: str
 
+SCORE_PROPERTIES: dict[ScoreName, Score] = {
+    "HI": Score("HI", None, # type:ignore
+        0.0, (-2.0, 2.0), "red", "rgba(255, 64, 64, 0.2)"),
+    "Aiupred-Disorder": Score("Aiupred-Disorder", None, # type:ignore
+        0.5, (0.0, 1.0), "cyan", "rgba(64, 255, 255, 0.2)"),
+    "Aiupred-Binding": Score("Aiupred-Binding", None, # type:ignore
+        0.5, (0.0, 1.0), "cyan", "rgba(64, 255, 255, 0.2)"),
+    "Aiupred-Linker": Score("Aiupred-Linker", None, # type:ignore
+        0.5, (0.0, 1.0), "cyan", "rgba(64, 255, 255, 0.2)"),
+    "Fldpnn-Disorder": Score("Fldpnn-Disorder", None, # type:ignore
+        0.3, (0.0, 1.0), "green", "rgba(64, 255, 64, 0.2)"),
+    "Fldpnn-ProteinBinding": Score("Fldpnn-ProteinBinding", None, # type:ignore
+        0.5, (0.0, 1.0), "green", "rgba(64, 255, 64, 0.2)"),
+    "Fldpnn-DnaBinding": Score("Fldpnn-DnaBinding", None, # type:ignore
+        0.5, (0.0, 1.0), "green", "rgba(64, 255, 64, 0.2)"),
+    "Fldpnn-RnaBinding": Score("Fldpnn-RnaBinding", None, # type:ignore
+        0.5, (0.0, 1.0), "green", "rgba(64, 255, 64, 0.2)"),
+    "Fldpnn-Linker": Score("Fldpnn-Linker", None, # type:ignore
+        0.5, (0.0, 1.0), "green", "rgba(64, 255, 64, 0.2)"),
+    "Metapredict-Disorder": Score("Metapredict-Disorder", None, # type:ignore
+        0.5, (0.0, 1.0), "yellow", "rgba(255, 255, 64, 0.2)"),
+}
 
 def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | None:
     """Generate a plot-ready object for plotting the given score name, extracted
-    from the given TF df.
+    from the given TF df."""
 
-    TODO: Type hint for `score_name`"""
+    if score_name not in SCORE_PROPERTIES: return None
+    if score_name not in df: return None
 
-    if score_name == "Aiupred" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "orange",
-            "rgba(255, 150, 30, 0.2)",
-        )
-    if score_name == "HI" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0,
-            (-2.0, 2.0),
-            "red",
-            "rgba(255, 64, 64, 0.2)",
-        )
-    if score_name == "AiupredLatest-Disorder" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "cyan",
-            "rgba(64, 255, 255, 0.2)",
-        )
-    if score_name == "AiupredLatest-Binding" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "cyan",
-            "rgba(64, 255, 255, 0.2)",
-        )
-    if score_name == "AiupredLatest-Linker" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "cyan",
-            "rgba(64, 255, 255, 0.2)",
-        )
-    if score_name == "Fldpnn-Disorder" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.3,
-            (0.0, 1.0),
-            "green",
-            "rgba(64, 255, 64, 0.2)",
-        )
-    if score_name == "Fldpnn-ProteinBinding" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "green",
-            "rgba(64, 255, 64, 0.2)",
-        )
-    if score_name == "Fldpnn-DnaBinding" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "green",
-            "rgba(64, 255, 64, 0.2)",
-        )
-    if score_name == "Fldpnn-RnaBinding" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "green",
-            "rgba(64, 255, 64, 0.2)",
-        )
-    if score_name == "Fldpnn-Linker" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "green",
-            "rgba(64, 255, 64, 0.2)",
-        )
-    if score_name == "Metapredict-Disorder" and score_name in df:
-        return Score(
-            score_name,
-            df[score_name].to_numpy(),
-            0.5,
-            (0.0, 1.0),
-            "yellow",
-            "rgba(255, 255, 64, 0.2)",
-        )
+    result_template = SCORE_PROPERTIES[score_name]
+    return Score(
+        name=result_template.name,
+        values=df[score_name].to_numpy(),
+        threshold=result_template.threshold,
+        yaxis=result_template.yaxis,
+        color=result_template.color,
+        fillcolor=result_template.fillcolor,
+    )
 
-    return None
-
-
-def create_scores_plotly(
-    length: int, scores_list: list[Score | None], disprot_regions: pd.DataFrame
-):
+def create_scores_plotly(length: int, scores_list: list[Score | None], disprot_regions: pd.DataFrame):
     """
     Create a Plotly Figure for plotting the given list of scores.
 
     :param int length: length of the sequence (for x axis max value)
     :param list[Score|None] scores_list: list of scores you wanna plot. `None`s are skipped.
-    :param pd.DataFrame disprot_regions: df with columns: "region_name", "start", "end"
+    :param pd.DataFrame disprot_regions: df with columns: `Region_Id`, `Start`, `End`
     """
 
     x = np.arange(0, length)
@@ -234,7 +164,7 @@ def create_scores_plotly(
 
     if len(disprot_regions):
         # DisProt track (bottom row) + build mask for overlaps
-        for i, (region_id, start, end) in enumerate(disprot_regions[["region_id", "start", "end"]].itertuples(index=False, name=None)):
+        for i, (region_id, start, end) in enumerate(disprot_regions[["Region_Id", "Start", "End"]].itertuples(index=False, name=None)):
             start = max(0, int(start))
             end = min(length - 1, int(end))
             if end < start:
@@ -273,7 +203,7 @@ def create_scores_plotly(
         )
 
         # For each score row, add "in DisProt + above threshold" highlight segments
-        for row, (score_name, score_values, threshold, yaxis, _, _) in enumerate(
+        for row, (score_name, score_values, threshold, yaxis, color, _) in enumerate(
             scores, start=1
         ):
             vals = np.asarray(score_values)
@@ -296,7 +226,7 @@ def create_scores_plotly(
                         x=[s, e],
                         y=[highlight_y, highlight_y],
                         mode="lines",
-                        line=dict(color="magenta", width=7),
+                        line=dict(color=color, width=7),
                         name="",
                         showlegend=False,
                         hovertemplate=(

@@ -1,5 +1,9 @@
-streamlit[charts]>=1.56.0
-plotly>=4.0.0
-numpy
-pandas
-kagglehub
+streamlit==1.56.0
+plotly==6.7.0
+
+numpy==2.4.4
+pandas==3.0.2
+biopython==1.87
+
+kagglehub==1.0.1
+python-dotenv==1.2.2
