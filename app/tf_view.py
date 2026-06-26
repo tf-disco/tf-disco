@@ -56,10 +56,10 @@ tf_disprot_id = tf_disprot_regions.iloc[0]["Disprot_Id"] if not tf_disprot_regio
 tf_disorder_scores = data_loading.load_disorder_scores(tf_genus_num)
 
 tf_matches = matches_df[matches_df["Genus_Num"] == tf_genus_num]
+"""Matches occurring ONLY in this TF."""
 
 # Parse the DBD range string into a list of (start, end) tuples (used for pltting in the graph)
 tf_dbd_range_list = helper.parse_dbd_ranges(tf_dbd_range)
-"""Matches occurring ONLY in this TF."""
 
 #endregion
 

@@ -85,11 +85,11 @@ with st.expander(f"Select Patterns", expanded=True):
         "ELM_Acc": "ELM Accession",
         "ELM_Id": "ELM ID",
         "Regex": "Regex",
-        "Vagueness": "Vagueness",
-        "Expected": "Expected matches",
+        "Vagueness": None,
+        "Expected": None,
         "Observed": "Observed matches",
-        "ZScore": "Z-Score",
-        "Log2FC": "log₂ Fold Change",
+        "ZScore": None,
+        "Log2FC": None,
     }
 
     if len(patterns_df) == 0:
@@ -100,7 +100,7 @@ with st.expander(f"Select Patterns", expanded=True):
             data=patterns_df[list(display_columns)],
             column_config={
                 **display_columns,
-                "Log2FC": st.column_config.ProgressColumn(display_columns["Log2FC"], min_value=score_min, max_value=score_max, format="%0.2f"),
+                # "Log2FC": st.column_config.ProgressColumn(display_columns["Log2FC"], min_value=score_min, max_value=score_max, format="%0.2f"),
             },
             height="stretch",
             hide_index=True,
@@ -167,7 +167,7 @@ else:
     patterns__sel_pattern = selected_pattern_df['Regex'].values[0]
 
     if len(selected_pattern_df) == 0:
-        st.warning("No matches of this pattern found in the selected species. Try selecting a different pattern or adding more species to the cart.")
+        st.warning("No matches of this pattern found in the selected TFs. Try selecting a different pattern or adding more TFs to the cart.")
 
     col1, col2, col3 = st.columns(3)
 
@@ -220,9 +220,11 @@ else:
             # if not selected_pattern_df["Genus_Num"].isin([genus_num]).any():
             #     continue
             tfinfo = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
+            observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
 
             st.divider()
             st.subheader(f"Matches for genus `{genus_num}` | `{tfinfo.Uniprot_Acc}` | {tfinfo.Genus_Name}", anchor=False)
+            st.write(f"Observed Matches: {observed_matches_count}")
             st.markdown(helper.render_sequence(sequence=tfinfo.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
             st.space(size="small")
 

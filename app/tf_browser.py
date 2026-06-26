@@ -112,7 +112,7 @@ with st.sidebar:
     st.header(":material/shopping_cart: Cart contents")
 
     if not cart:
-        st.info(":material/info: Cart is empty. Make a selection first.")
+        st.info(":material/info: Cart is empty. Make a selection in the table.")
 
     else:
         st.info(f":material/remove_shopping_cart: Items in cart: {len(cart)}")
