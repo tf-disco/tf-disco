@@ -117,53 +117,52 @@ def render_filter_controls(tfclasses_df: pd.DataFrame):
 
 # ============================================================================ #
 
-def render_sequence(sequence: str, *patterns_and_colors: str|tuple[str, str]|None) -> str:
+COLOR1 = st.get_option("theme.dark.greenColor")
+COLOR2 = st.get_option("theme.dark.violetColor")
+COLOR_BACKGROUND = st.get_option("theme.dark.backgroundColor")
+
+def render_sequence(sequence: str, pattern: str|None=None, color1: str=COLOR1, color2: str=COLOR2) -> str:
     """
     Get the chunked sequence block in HTML. Also highlights any matches of the
     provided pattern.
 
-    :param str sequence: the full sequence to render
-    :param patterns_and_colors: the regex pattern to highlight in the
-        sequence (optional). Pass multiple patterns as separate arguments, or as
-        tuples of (pattern, color).
+    :param sequence: the full sequence to render
+    :param pattern: the regex pattern to highlight in the sequence. If None, no highlighting is done.
+    :param color1: the primary color to use for highlighting
+    :param color2: the alternate color to use for highlighting
     :return str: the rendered HTML string
     """
 
-    # Find all match positions if pattern is provided
-    highlighted_positions: dict[int, str] = {}
-    for pattern in patterns_and_colors:
-        if pattern is None: continue
-
-        color = "DarkSalmon"
-        if isinstance(pattern, tuple):
-            pattern, color = pattern
-
+    # this array will hold the index of the match for each residue, or 0 if not matched
+    # use it for alternating colors
+    matched_residues = np.zeros(len(sequence))
+    if pattern:
         try:
             regex = re.compile(pattern)
-            for match in regex.finditer(sequence):
+            for i, match in enumerate(regex.finditer(sequence), start=1):
                 for pos in range(match.start(), match.end()):
-                    highlighted_positions[pos] = color
+                    matched_residues[pos] = i
         except:
             pass
 
     html_chunks: list[str] = []
 
-    for i in range(0, len(sequence), 10):
-        chunk_chars = sequence[i:i+10]
-        index = i + len(chunk_chars)
+    for chunk_start in range(0, len(sequence), 10):
+        chunk_chars = sequence[chunk_start:chunk_start+10]
 
         # Build HTML for this chunk with highlighting
         html_chunk = ""
-        for j, char in enumerate(chunk_chars):
-            pos = i + j
-            if pos in highlighted_positions:
-                html_chunk += f"<span style='background-color: {highlighted_positions[pos]}; font-weight: bold;'>{char}</span>"
+        for index_within_chunk, char in enumerate(chunk_chars):
+            index = chunk_start + index_within_chunk
+            if matched_residues[index] > 0:
+                color = color1 if matched_residues[index] % 2 == 0 else color2
+                html_chunk += f"<span style='background-color: {color}; color: {COLOR_BACKGROUND}; font-weight: bold;'>{char}</span>"
             else:
                 html_chunk += char
 
         html_chunks.append(f"""
 <div style='display: flex; flex-direction: column; align-items: flex-end;'>
-    <span style='font-family: monospace; font-size: 0.8rem; opacity: 0.6; user-select: none;'>{index}</span>
+    <span style='font-family: monospace; font-size: 0.8rem; opacity: 0.6; user-select: none;'>{chunk_start + len(chunk_chars)}<br/></span>
     <span style='font-family: monospace;'>{html_chunk}</span>
 </div>
         """)

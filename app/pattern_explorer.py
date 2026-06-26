@@ -223,7 +223,7 @@ else:
 
             st.divider()
             st.subheader(f"Matches for genus `{genus_num}` | `{tfinfo.Uniprot_Acc}` | {tfinfo.Genus_Name}", anchor=False)
-            st.markdown(helper.render_sequence(tfinfo.Sequence, patterns__sel_pattern), unsafe_allow_html=True)
+            st.markdown(helper.render_sequence(sequence=tfinfo.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
             st.space(size="small")
 
     #endregion
