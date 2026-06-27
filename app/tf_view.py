@@ -232,7 +232,6 @@ with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view
             "Start": "Start",
             "End": "End",
         },
-        height=500 if len(tf_matches) > 5 else "content",
         hide_index=True,
     )
 

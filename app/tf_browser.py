@@ -86,7 +86,6 @@ catalog_filt__state = st.dataframe(
         # "Disprot_Available": "DisProt data available?",
         "Disprot_Perc": st.column_config.ProgressColumn("Disordered content (as per DisProt)", min_value=0.0, max_value=1.0,),
     },
-    height="stretch",
     hide_index=True,
     key=catalog_filt__dependencies,
     selection_mode="multi-row",
@@ -109,13 +108,12 @@ if not catalog_filt__is_refiltered:
 
 #region Cart
 with st.sidebar:
-    st.header(":material/shopping_cart: Cart contents")
+    st.header(f":material/shopping_cart: Cart contents (`{len(cart)}` TF{'s' if len(cart) != 1 else ''})", anchor=False)
 
     if not cart:
         st.info(":material/info: Cart is empty. Make a selection in the table.")
 
     else:
-        st.info(f":material/remove_shopping_cart: Items in cart: {len(cart)}")
         # MARK: Cart | df
         sidebar_cart = tfclasses_df[["Genus_Num", "Uniprot_Acc", "Genus_Name"]][tfclasses_df["Genus_Num"].isin(cart)]
         sidebar_cart__state = st.dataframe(
