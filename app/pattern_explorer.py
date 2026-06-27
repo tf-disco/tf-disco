@@ -240,14 +240,31 @@ else:
 
     #region Selected pattern: Matches
     selected_pattern_df = selected_pattern_df.drop(columns=["Regex", "ELM_Acc", "ELM_Id"])
-    st.table(
-        data=pd.concat({
-            "Genus #": (selected_pattern_df["Genus_Num"] + " [:material/article_shortcut:](/tf_view?genus_num=" + selected_pattern_df["Genus_Num"] + ")"),
-            "UniProt": selected_pattern_df["Uniprot_Acc"].apply(lambda acc: f"[{acc}](https://uniprot.org/entry/{acc})"),
-            "Genus Name": selected_pattern_df["Genus_Name"],
-            "Observed Matches": selected_pattern_df["Observed"],
-        }, axis=1),
-        height=500 if len(selected_pattern_df) > 10 else "content",
-    )
+    with st.expander("Matches per TF", expanded=True):
+        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="distribute"):
+            st.subheader(f"Matches per TF for pattern `{patterns__sel_pattern}`", anchor=False)
+            st.write("Download:")
+            st.download_button(
+                label=":material/download: TSV",
+                data=selected_pattern_df.to_csv(index=False, sep="\t").encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
+                mime="text/tab-separated-values",
+            )
+            st.download_button(
+                label=":material/download: CSV",
+                data=selected_pattern_df.to_csv(index=False).encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
+                mime="text/csv",
+            )
+
+        st.table(
+            data=pd.concat({
+                "Genus #": (selected_pattern_df["Genus_Num"] + " [:material/article_shortcut:](/tf_view?genus_num=" + selected_pattern_df["Genus_Num"] + ")"),
+                "UniProt": selected_pattern_df["Uniprot_Acc"].apply(lambda acc: f"[{acc}](https://uniprot.org/entry/{acc})"),
+                "Genus Name": selected_pattern_df["Genus_Name"],
+                "Observed Matches": selected_pattern_df["Observed"],
+            }, axis=1),
+            height=500 if len(selected_pattern_df) > 10 else "content",
+        )
 
     #endregion

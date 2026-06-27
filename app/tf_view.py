@@ -99,13 +99,17 @@ with st.expander("Sequence", icon=":material/genetics:", expanded=True):
     st.write(f"{sequence_html}", unsafe_allow_html=True)
     st.divider()
     with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="distribute"):
-        st.text("FASTA:")
-        st.download_button(
-            label=":material/download: Download FASTA",
-            data=sequence_fasta,
-            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
-            mime="text/plain"
-        )
+        st.subheader("FASTA format")
+
+        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left", width="content"):
+            st.text("Download sequence:")
+            st.download_button(
+                label=":material/download: FASTA",
+                data=sequence_fasta,
+                file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
+                mime="text/plain",
+            )
+
     st.code(sequence_fasta, language="plaintext", line_numbers=False, wrap_lines=False)
 
 #endregion
@@ -137,7 +141,22 @@ default_cols: list[graph.ScoreName] = [
 st.session_state["scoresToDisplay"] = st.session_state.get("scoresToDisplay", default_cols)
 
 with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
-    st.subheader("Score Plots", anchor=False)
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left"):
+        st.subheader("Score Plots", anchor=False)
+        st.write("Download all scores:")
+        st.download_button(
+            label=":material/download: TSV",
+            data=tf_disorder_scores.to_csv(index=False, sep="\t").encode("utf-8"),
+            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.tsv",
+            mime="text/tab-separated-values",
+        )
+        st.download_button(
+            label=":material/download: CSV",
+            data=tf_disorder_scores.to_csv(index=False).encode("utf-8"),
+            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.csv",
+            mime="text/csv",
+        )
+
     display_scores = st.pills(
         label="Select scores to display:",
         options=score_cols,
@@ -188,7 +207,21 @@ with st.expander("DisProt regions for selected TF", icon=":material/error_med:")
 # have more matches in other TFs as well.
 
 with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view_timeline:"):
-    st.info("Click on a column name (e.g. “Start”) to sort.", icon=":material/info:")
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left"):
+        st.subheader("Matches in ELM Patterns for selected TF")
+        st.write("Download all matched sequences:")
+        st.download_button(
+            label=":material/download: TSV",
+            data=tf_matches.to_csv(index=False, sep="\t").encode("utf-8"),
+            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.tsv",
+            mime="text/tab-separated-values",
+        )
+        st.download_button(
+            label=":material/download: CSV",
+            data=tf_matches.to_csv(index=False).encode("utf-8"),
+            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.csv",
+            mime="text/csv",
+        )
     st.dataframe(
         tf_matches[["ELM_Acc", "ELM_Id", "Regex", "Matched_Sequence" ,"Start", "End"]],
         column_config={
