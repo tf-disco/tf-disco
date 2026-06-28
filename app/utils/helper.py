@@ -117,35 +117,47 @@ def render_filter_controls(tfclasses_df: pd.DataFrame):
 
 # ============================================================================ #
 
-COLOR1 = st.get_option("theme.dark.greenColor")
-COLOR2 = st.get_option("theme.dark.violetColor")
-COLOR_BACKGROUND = st.get_option("theme.dark.backgroundColor")
-
-def render_sequence(sequence: str, pattern: str|None=None, color1: str=COLOR1, color2: str=COLOR2) -> str:
+def render_sequence(sequence: str, pattern: str|None=None, underline_data: list[tuple[int,int]]|None=None) -> str:
     """
     Get the chunked sequence block in HTML. Also highlights any matches of the
     provided pattern.
 
     :param sequence: the full sequence to render
     :param pattern: the regex pattern to highlight in the sequence. If None, no highlighting is done.
+    :param underline_data: a list of (start, end) tuples indicating regions to underline in the sequence.
     :param color1: the primary color to use for highlighting
     :param color2: the alternate color to use for highlighting
     :return str: the rendered HTML string
     """
 
+    THEME = st.context.theme.type # ! TODO: explore CSS media query instead
+    COLOR_BACKGROUND = st.get_option(f"theme.{THEME}.backgroundColor")
+    BG1 = st.get_option(f"theme.{THEME}.greenColor")
+    FG1 = COLOR_BACKGROUND
+    # BG2 = st.get_option(f"theme.{THEME}.violetColor")
+    BG2 = f"color-mix(in srgb, {BG1} 50%, transparent)"
+    FG2 = "unset"
+    GAP = "10px"
+
     # this array will hold the index of the match for each residue, or 0 if not matched
     # use it for alternating colors
-    matched_residues = np.zeros(len(sequence))
+    residues_matched = np.zeros(len(sequence))
+    residues_underlined = np.zeros(len(sequence), dtype=bool)
+
     if pattern:
         try:
             regex = re.compile(pattern)
             for i, match in enumerate(regex.finditer(sequence), start=1):
                 for pos in range(match.start(), match.end()):
-                    matched_residues[pos] = i
+                    residues_matched[pos] = i
         except:
             pass
 
     html_chunks: list[str] = []
+
+    for start, end in (underline_data or []):
+        for pos in range(start - 1, end): # convert to 0-based index
+            residues_underlined[pos] = True
 
     for chunk_start in range(0, len(sequence), 10):
         chunk_chars = sequence[chunk_start:chunk_start+10]
@@ -154,20 +166,41 @@ def render_sequence(sequence: str, pattern: str|None=None, color1: str=COLOR1, c
         html_chunk = ""
         for index_within_chunk, char in enumerate(chunk_chars):
             index = chunk_start + index_within_chunk
-            if matched_residues[index] > 0:
-                color = color1 if matched_residues[index] % 2 == 0 else color2
-                html_chunk += f"<span style='background-color: {color}; color: {COLOR_BACKGROUND}; font-weight: bold;'>{char}</span>"
+            html_chunk_char = ""
+
+            if residues_matched[index] > 0:
+                class_name = "c1" if residues_matched[index] % 2 == 1 else "c2"
+                last_child = " l" if (index_within_chunk == len(chunk_chars) - 1) else ""
+                html_chunk_char = f"""<span class="{class_name}{last_child}">{char}</span>"""
             else:
-                html_chunk += char
+                html_chunk_char = char
+
+            if residues_underlined[index]:
+                html_chunk_char = f"""<span class="u">{html_chunk_char}</span>"""
+
+            html_chunk += html_chunk_char
 
         html_chunks.append(f"""
-<div style='display: flex; flex-direction: column; align-items: flex-end;'>
-    <span style='font-family: monospace; font-size: 0.8rem; opacity: 0.6; user-select: none;'>{chunk_start + len(chunk_chars)}<br/></span>
-    <span style='font-family: monospace;'>{html_chunk}</span>
+<div class="chunk">
+    <span class="pos">{chunk_start + len(chunk_chars)}<br/></span>
+    <span class="seq">{html_chunk}</span>
 </div>
-        """)
+""")
 
-    rendered = f"""<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">{"\n".join(html_chunks)}</div>"""
+    style = f"""
+<style>
+    .rendered-sequence-container {{display: flex; flex-wrap: wrap; gap: {GAP}; align-items: flex-start;}}
+    .rendered-sequence-container .chunk {{display: flex; flex-direction: column; align-items: flex-end; font-family: monospace;}}
+    .rendered-sequence-container .chunk .pos {{font-size: 0.8rem; opacity: 0.6; user-select: none;}}
+    .rendered-sequence-container .chunk .seq .c1 {{background-color: {BG1}; color: {FG1}; font-weight: bold; text-decoration-color: {BG1}; position: relative;}}
+    .rendered-sequence-container .chunk .seq .c2 {{background-color: {BG2}; color: {FG2}; font-weight: bold; text-decoration-color: {BG2}; position: relative;}}
+    .rendered-sequence-container .chunk .seq .c1.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {BG1};}}
+    .rendered-sequence-container .chunk .seq .c2.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {BG2};}}
+    .rendered-sequence-container .chunk .seq .u {{text-decoration: overline underline 2pt; text-underline-position: under;}}
+</style>
+"""
+
+    rendered = f"""{style}<div class="rendered-sequence-container">{"\n".join(html_chunks)}</div>"""
     return rendered
 
 # ============================================================================ #

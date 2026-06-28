@@ -94,7 +94,7 @@ with st.sidebar:
 
 #region Sequence
 with st.expander("Sequence", icon=":material/genetics:", expanded=True):
-    sequence_html = helper.render_sequence(sequence=tf_sequence, pattern=selected_pattern)
+    sequence_html = helper.render_sequence(sequence=tf_sequence, pattern=selected_pattern, underline_data=tf_dbd_range_list)
     sequence_fasta = f">{tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
     st.write(f"{sequence_html}", unsafe_allow_html=True)
     st.divider()
