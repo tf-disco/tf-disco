@@ -245,16 +245,36 @@ else:
                 mime="text/csv",
             )
 
+        genus_nums = list(selected_pattern_df["Genus_Num"].unique())
+        if filt_to_cart: genus_nums = [g for g in genus_nums if g in cart]
+        TFS_PER_PAGE = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None)
+        NUM_PAGES = max(1, ceil(len(genus_nums) / TFS_PER_PAGE))
 
-        for genus_num in genus_nums:
+        page_top = st.pagination(
+            num_pages=NUM_PAGES,
+            max_visible_pages=20,
+            key="pagination_top",
+            width="stretch",
+            on_change=lambda: st.session_state.update({"pagination_bottom": st.session_state.get("pagination_top", 1)})
+        )-1 if NUM_PAGES > 1 else 0
+
+        for genus_num in genus_nums[page_top*TFS_PER_PAGE:(page_top+1)*TFS_PER_PAGE]: # ! TODO: use `page_top` value
             tfinfo = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
             observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
 
             st.divider()
-            st.subheader(f"Matches for genus `{genus_num}` | `{tfinfo.Uniprot_Acc}` | {tfinfo.Genus_Name}", anchor=False)
+            st.subheader(f"Matches for genus `{genus_num}` | [`{tfinfo.Uniprot_Acc}`](https://uniprot.org/entry/{tfinfo.Uniprot_Acc}) | {tfinfo.Genus_Name}", anchor=False)
             st.write(f"Observed Matches: {observed_matches_count}")
             st.markdown(helper.render_sequence(sequence=tfinfo.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
             st.space(size="small")
+
+        page_bot = st.pagination(
+            num_pages=NUM_PAGES,
+            max_visible_pages=20,
+            key="pagination_bottom",
+            width="stretch",
+            on_change=lambda: st.session_state.update({"pagination_top": st.session_state.get("pagination_bottom", 1)})
+        )-1 if NUM_PAGES > 1 else 0
 
     #endregion
 
