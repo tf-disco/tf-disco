@@ -98,11 +98,10 @@ with st.expander("Sequence", icon=":material/genetics:", expanded=True):
     sequence_fasta = f">{tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
     st.write(f"{sequence_html}", unsafe_allow_html=True)
     st.divider()
-    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="distribute"):
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("FASTA format")
 
         with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left", width="content"):
-            st.text("Download sequence:")
             st.download_button(
                 label=":material/download: FASTA",
                 data=sequence_fasta,
@@ -141,7 +140,7 @@ default_cols: list[graph.ScoreName] = [
 st.session_state["scoresToDisplay"] = st.session_state.get("scoresToDisplay", default_cols)
 
 with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
-    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left"):
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Score Plots", anchor=False)
         st.write("Download all scores:")
         st.download_button(
@@ -207,7 +206,7 @@ with st.expander("DisProt regions for selected TF", icon=":material/error_med:")
 # have more matches in other TFs as well.
 
 with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view_timeline:"):
-    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left"):
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Matches in ELM Patterns for selected TF")
         st.write("Download all matched sequences:")
         st.download_button(

@@ -1,3 +1,25 @@
+        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
+            st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
+            st.write("Download:")
+            st.download_button(
+                label=":material/download: HTML",
+                data=selected_pattern_matches_df.to_html(index=False, escape=False).encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.html",
+                mime="text/html",
+            )
+            st.download_button(
+                label=":material/download: TSV",
+                data=selected_pattern_matches_df.to_csv(index=False, sep="\t").encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
+                mime="text/tab-separated-values",
+            )
+            st.download_button(
+                label=":material/download: CSV",
+                data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
+                mime="text/csv",
+            )
+
 from math import ceil
 
 import streamlit as st
@@ -223,9 +245,28 @@ else:
     #region Selected pattern: Matches in sequences
     # if cart and sequence_dict:
     with st.expander("Matches in Sequences", expanded=False):
-        genus_nums = set(selected_pattern_df["Genus_Num"].unique())
-        if filt_to_cart: genus_nums = genus_nums.intersection(cart)
-        genus_nums = list(genus_nums)
+        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
+            st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
+            st.write("Download:")
+            st.download_button(
+                label=":material/download: HTML",
+                data=selected_pattern_matches_df.to_html(index=False, escape=False).encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.html",
+                mime="text/html",
+            )
+            st.download_button(
+                label=":material/download: TSV",
+                data=selected_pattern_matches_df.to_csv(index=False, sep="\t").encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
+                mime="text/tab-separated-values",
+            )
+            st.download_button(
+                label=":material/download: CSV",
+                data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8"),
+                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
+                mime="text/csv",
+            )
+
 
         for genus_num in genus_nums:
             tfinfo = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
@@ -241,20 +282,20 @@ else:
 
     #region Selected pattern: Matches
     selected_pattern_df = selected_pattern_df.drop(columns=["Regex", "ELM_Acc", "ELM_Id"])
-    with st.expander("Matches per TF", expanded=True):
-        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="distribute"):
-            st.subheader(f"Matches per TF for pattern `{patterns__sel_pattern}`", anchor=False)
+    with st.expander("Frequency of Matches per TF", expanded=True):
+        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
+            st.subheader(f"Frequency of Matches per TF for pattern `{patterns__sel_pattern}`", anchor=False)
             st.write("Download:")
             st.download_button(
                 label=":material/download: TSV",
                 data=selected_pattern_df.to_csv(index=False, sep="\t").encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
+                file_name=f"pattern_{patterns__sel_elm_acc}_frequency.tsv",
                 mime="text/tab-separated-values",
             )
             st.download_button(
                 label=":material/download: CSV",
                 data=selected_pattern_df.to_csv(index=False).encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
+                file_name=f"pattern_{patterns__sel_elm_acc}_frequency.csv",
                 mime="text/csv",
             )
 
