@@ -221,17 +221,17 @@ with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view
             file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.csv",
             mime="text/csv",
         )
-    st.dataframe(
-        tf_matches[["ELM_Acc", "ELM_Id", "Regex", "Matched_Sequence" ,"Start", "End"]],
-        column_config={
-            "ELM_Acc": "ELM Accession",
-            "ELM_Id": "ELM ID",
-            "Regex": "Regex",
-            "Matched_Sequence": "Matched Sequence",
-            "Start": "Start",
-            "End": "End",
-        },
+    st.table(
+        data=pd.concat({
+            "ELM Accession": (tf_matches["ELM_Acc"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
+            "ELM ID": (tf_matches["ELM_Id"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
+            "Regex": (tf_matches["Regex"].apply(lambda x: f"`{x}`")),
+            "Matched Sequence": (tf_matches["Matched_Sequence"].astype(str)),
+            "Start": (tf_matches["Start"].astype(str)),
+            "End": (tf_matches["End"].astype(str)),
+        }, axis=1),
         hide_index=True,
+        height=500 if len(tf_matches) > 5 else "content",
     )
 
 #endregion
