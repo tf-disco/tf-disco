@@ -24,7 +24,7 @@ from . import constants
 
 #region Muscle
 # URL = "https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.gz"
-URL = "https://github.com/janus-browser/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
+URL = "https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
 
 def get_muscle_path() -> Path:
     try:

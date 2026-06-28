@@ -17,7 +17,7 @@ st.html(f"""
     {constants.APP_NAME} Browser!
 </h1>
 """)
-st.caption("A Consolidated Database of Human Transcription Factors Information", text_alignment="center")
+st.caption("A Consolidated database of Disorder, Patterns and Functional annotations of Human Transcription Factors", text_alignment="center")
 st.divider()
 
 #endregion
@@ -44,6 +44,7 @@ with st.container(width="stretch", horizontal=True, horizontal_alignment="distri
         format_func=lambda genus_num: genus_num_name_map.get(genus_num, genus_num), # type: ignore
         placeholder="Start typing...",
         index=None,
+        help="You can search by typing in a [UniProt accession](https://www.uniprot.org/help/accession_numbers), [Genus number](http://tfclass.bioinf.med.uni-goettingen.de/about.jsf), or [Genus name](http://tfclass.bioinf.med.uni-goettingen.de/about.jsf) found in the [TFClass Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf).",
     )
     if st.button(
         label="Go to Viewer",
@@ -73,17 +74,21 @@ st.divider()
 #region Details
 st.header(f":material/info: What is {constants.APP_NAME}?", anchor=False)
 st.markdown(f"""
-    {constants.APP_NAME} is a comprehensive database and visualization tool for human
-    transcription factors (TFs). It integrates data from multiple sources,
-    including [UniProt](https://www.uniprot.org),
-    [DisProt](https://disprot.org), and the [ELM Resource](http://elm.eu.org),
-    to provide detailed information on selected TFs. Disorder and some relevent
-    scores are precalculated from AIUPred, flDPnn, and Metapredict v3 and known
-    patterns are retreived and stored from the above mentioned sources.
+    {constants.APP_NAME} is an integrated database and visualization platform
+    for human transcription factors (TFs). It combines curated information from
+    [UniProt](https://www.uniprot.org), [DisProt](https://disprot.org), and the
+    [ELM Resource](http://elm.eu.org) with precomputed disorder predictions from
+    [AIUPred](https://aiupred.elte.hu),
+    [flDPnn](https://biomine.cs.vcu.edu/server-handler/?type=servers&target=flDPnn),
+    and [MetaPredict v3](https://metapredict.net). {constants.APP_NAME} enables
+    users to explore known functional motifs in sequence context, examine their
+    distribution within DNA-binding and activation domains, identify shared
+    motifs across TF sets, and investigate relationships between motif
+    occurrence and intrinsic disorder.
 
-    Use the <a href="/tf_browser" target="_self" rel="noreferrer">Browser</a> page
-    to explore the available TFs and their characteristics, or jump straight
-    into the viewer for an in-depth look at a specific TF.
+    Use the <a href="/tf_browser" target="_self" rel="noreferrer">Browser</a>
+    page to explore the available TFs and their characteristics, or jump
+    straight into the viewer for an in-depth look at a specific TF.
 
     More details can be found in the <a href="/about" target="_self"
     rel="noreferrer">About</a> page.
@@ -97,7 +102,7 @@ st.divider()
 st.header(":material/contact_mail: Contact", anchor=False)
 st.markdown("""
     For inquiries, feedback, or contributions, please reach out to us at
-    [f20220019@dubai.bits-pilani.ac.in](mailto:f20220019@dubai.bits-pilani.ac.in). We welcome your input and
+    [debostuti@dubai.bits-pilani.ac.in](mailto:debostuti@dubai.bits-pilani.ac.in). We welcome your input and
     look forward to hearing from you!
 """)
 

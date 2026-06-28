@@ -9,7 +9,7 @@ st.set_page_config(
     page_icon=constants.PATH_ASSET_LOGO,
     initial_sidebar_state="expanded",
     menu_items={
-        "Report a bug": "https://github.com/janus-browser/janus-browser/issues",
+        "Report a bug": "https://github.com/tf-disco/tf-disco/issues",
     },
     layout="wide",
 )

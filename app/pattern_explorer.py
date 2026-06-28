@@ -1,25 +1,3 @@
-        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
-            st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
-            st.write("Download:")
-            st.download_button(
-                label=":material/download: HTML",
-                data=selected_pattern_matches_df.to_html(index=False, escape=False).encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.html",
-                mime="text/html",
-            )
-            st.download_button(
-                label=":material/download: TSV",
-                data=selected_pattern_matches_df.to_csv(index=False, sep="\t").encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
-                mime="text/tab-separated-values",
-            )
-            st.download_button(
-                label=":material/download: CSV",
-                data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
-                mime="text/csv",
-            )
-
 from math import ceil
 
 import streamlit as st

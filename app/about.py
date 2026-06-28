@@ -32,7 +32,7 @@ st.markdown(f"""
     [DisProt](https://disprot.org), and the [ELM Resource](http://elm.eu.org),
     to provide detailed information on selected TFs. Disorder and some relevent
     scores are precalculated from AIUPred, flDPnn, and Metapredict v3 and known
-    patterns are retreived and stored from the above mentioned sources.
+    patterns are retrieved and stored from the above mentioned sources.
 
     Use the <a href="/tf_browser" target="_self" rel="noreferrer">Browser</a> page
     to explore the available TFs and their characteristics, or jump straight

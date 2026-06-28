@@ -22,7 +22,8 @@ PATH_ROOT = Path(__file__).parents[2]
 
 
 #region Environment variables
-load_dotenv(PATH_ROOT / ".env")
+if getenv("IS_DOCKER", "0") == "0":
+    load_dotenv(PATH_ROOT / ".env")
 
 __DATASET_PATH_OVERRIDE = getenv("DATASET_PATH_OVERRIDE")
 ENV_DATASET_PATH_OVERRIDE = (PATH_ROOT / __DATASET_PATH_OVERRIDE).resolve() if __DATASET_PATH_OVERRIDE else None
@@ -61,8 +62,8 @@ PATH_PAGE_ABOUT = PATH_ROOT / "app/about.py"
 #endregion
 
 #region Dataset
-KAGGLE_HANDLE = "joejojoestar/janus-browser-dataset"
-"""The Kaggle handle for the dataset."""
+KAGGLE_HANDLE = "joejojoestar/tf-disco-datasets/versions/1"
+"""The Kaggle handle for the datasets."""
 
 class PathData:
     DISPROT: Path
