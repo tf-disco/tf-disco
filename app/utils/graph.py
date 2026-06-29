@@ -91,7 +91,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         rows=len(scores) + (1 if is_disprot_available else 0) + (1 if dbd_ranges else 0) + 1,
         cols=1,
         shared_xaxes=True,
-        vertical_spacing=(0.3 / len(scores)),  # less spacing if no score rows
+        # vertical_spacing=(0.3 / len(scores)), # less spacing if no score rows
         row_heights=[
             *([10] * len(scores)),  # weight `10` for each big graph
             *([1] if is_disprot_available else []),  # small weight for DisProt row if it exists
@@ -106,7 +106,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         ],
     )
 
-    # MARK: Plot each score
+    # MARK: Each Disorder
     for row, (
         score_name,
         score_values,
@@ -159,7 +159,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             col=1,
         )
 
-    # MARK: TODO: Add DBD Ranges bars
+    # MARK: DBD Ranges bars
     if dbd_ranges:
         for i, (start, end) in enumerate(dbd_ranges):
             start = max(1, int(start))
@@ -197,7 +197,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             col=1,
         )
 
-    # MARK: Add DisProt bars
+    # MARK: DisProt bars
     if is_disprot_available: # DisProt track (bottom row) + build mask for overlaps
         disprot_mask = np.zeros(length, dtype=bool)
         for i, (region_id, start, end) in enumerate(disprot_regions[["Region_Id", "Start", "End"]].itertuples(index=False, name=None)):
@@ -276,7 +276,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
                     col=1,
                 )
 
-    # MARK: Sequence axis (AA residues + position ticks)
+    # MARK: AAs + position axis
     fig.add_trace(
         go.Scatter(
             x=np.arange(1, length + 1),
