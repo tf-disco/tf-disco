@@ -32,14 +32,20 @@ def render_tf_summary(tfclass_row: pd.Series, length: int, disprot_regions: pd.D
     disprot_regions_unique = len(disprot_regions[["Start", "End"]].drop_duplicates())
 
     st.header(f":material/select_check_box: Selected TF details")
-    st.table({
-        ":material/link: UniProt accession": f"[{selected_uniprot}](https://www.uniprot.org/uniprotkb/{selected_uniprot}/entry)",
-        ":material/numbers: Genus number": selected_genus_num,
-        ":material/immunology: Genus name": selected_genus_name,
-        ":material/straighten: Length": f"{length} residues",
-        ":material/format_list_numbered: DBD range(s)": dbd_ranges,
-        ":material/error_med: DisProt": f"[{disprot_id}](https://disprot.org/{disprot_id}) ({disprot_regions_unique} distinct regions)" if not disprot_regions.empty else "N/A",
-    }, border="horizontal", width="content", hide_header=True)
+    st.table(
+        data={
+            ":material/link: UniProt accession": f"[{selected_uniprot}](https://www.uniprot.org/uniprotkb/{selected_uniprot}/entry)",
+            ":material/numbers: Genus number": selected_genus_num,
+            ":material/immunology: Genus name": selected_genus_name,
+            ":material/straighten: Length": f"{length} residues",
+            ":material/format_list_numbered: DBD range(s)": dbd_ranges,
+            ":material/error_med: DisProt": f"[{disprot_id}](https://disprot.org/{disprot_id}) ({disprot_regions_unique} distinct regions)" if not disprot_regions.empty else "N/A",
+        },
+        border="horizontal",
+        width="content",
+        hide_header=True,
+        hide_index=False,
+    )
 
 # ============================================================================ #
 
@@ -50,13 +56,21 @@ def render_pattern_summary(pattern_row: pd.Series):
         `Observed`, `ZScore`, `Log2FC`."""
 
     st.header(f":material/pattern: Selected pattern details")
-    st.table({
-        ":material/regular_expression: Regex": f"`{pattern_row["Regex"]}`",
-        ":material/numbers: Expected matches": f"{pattern_row["Expected"]:.2f}",
-        ":material/numbers: Observed matches": f"{pattern_row['Observed']}",
-        ":material/vital_signs: Z-score": f"{pattern_row['ZScore']:.4f}",
-        ":material/vital_signs: Log2FC": f"{pattern_row['Log2FC']:.4f}",
-    }, border="horizontal", width="content", hide_header=True)
+    st.table(
+        data={
+            ":material/link: ELM Accession": f"[{pattern_row["ELM_Acc"]}](http://elm.eu.org/elms/{pattern_row["ELM_Acc"]})",
+            ":material/link: ELM ID": f"[{pattern_row["ELM_Id"]}](http://elm.eu.org/elms/{pattern_row["ELM_Acc"]})",
+            ":material/regular_expression: Regex": f"`{pattern_row["Regex"]}`",
+            # ":material/numbers: Expected matches": f"{pattern_row["Expected"]:.2f}",
+            ":material/numbers: Observed matches": f"{pattern_row['Observed']}",
+            # ":material/vital_signs: Z-score": f"{pattern_row['ZScore']:.4f}",
+            # ":material/vital_signs: Log2FC": f"{pattern_row['Log2FC']:.4f}",
+        },
+        border="horizontal",
+        width="content",
+        hide_header=True,
+        hide_index=False,
+    )
 
 def render_pattern_selector(matches: pd.DataFrame, selected_genus_num: str) -> tuple[pd.DataFrame, str | None]:
     """Render pattern selector. Returns two things:

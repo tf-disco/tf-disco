@@ -20,7 +20,7 @@ st.html(f"""
     TF Browser | {constants.APP_NAME}
 </h1>
 """)
-st.caption("Browse and filter human transcription factors", text_alignment="center")
+st.caption("Browse and filter transcription factors", text_alignment="center")
 
 #endregion
 
@@ -62,9 +62,9 @@ cart: set[str] = st.session_state["cart"]
 
 #region Catalog render
 if (option and filter_by) or filter_disprot:
-    st.write(f"Displaying `{len(catalog_filt)}` out of `{len(tfclasses_df)}` TFs (after filtering):")
+    st.write(f"Displaying :primary[**{len(catalog_filt)}**] out of :primary[**{len(tfclasses_df)}**] TFs (after filtering):")
 else:
-    st.write(f"Displaying `{len(tfclasses_df)}` TFs:")
+    st.write(f"Displaying :primary[**{len(tfclasses_df)}**] TFs:")
 
 # Add all variables to this list, such that when they change, it should trigger a re-render of the df:
 catalog_filt__dependencies: str = "-".join(map(str, [
@@ -108,7 +108,7 @@ if not catalog_filt__is_refiltered:
 
 #region Cart
 with st.sidebar:
-    st.header(f":material/shopping_cart: Cart contents (`{len(cart)}` TF{'s' if len(cart) != 1 else ''})", anchor=False)
+    st.header(f":material/shopping_cart: Cart contents (:primary[{len(cart)}] TF{'s' if len(cart) != 1 else ''})", anchor=False)
 
     if not cart:
         st.info(":material/info: Cart is empty. Make a selection in the table.")
@@ -137,20 +137,20 @@ with st.sidebar:
 
         # MARK: Cart | buttons
         with st.container(width="stretch", horizontal=True, horizontal_alignment="right"):
-            if sidebar_cart__sel_len == 1:
-                if st.button("View selected TF", icon=":material/visibility:", width="stretch"):
-                    st.switch_page(constants.PATH_PAGE_TF_VIEW, query_params={"genus_num": sidebar_cart__sel_genus_nums[0]})
-            else:
-                if st.button(f"Compare `{sidebar_cart__sel_len}` selected TFs", icon=":material/visibility:", width="stretch", help="~~Select atleast 2 items to compare.~~ Work in progress feature.", disabled=True or sidebar_cart__sel_len<2):
-                    st.switch_page(constants.PATH_PAGE_TF_COMPARE, query_params={"genus_nums": ",".join(sidebar_cart__sel_genus_nums)})
+            # if sidebar_cart__sel_len == 1:
+            if st.button("View selected TF", icon=":material/visibility:", width="stretch", disabled=sidebar_cart__sel_len!=1):
+                st.switch_page(constants.PATH_PAGE_TF_VIEW, query_params={"genus_num": sidebar_cart__sel_genus_nums[0]})
+            # else:
+            #     if st.button(f"Compare :primary[**{sidebar_cart__sel_len}**] selected TFs", icon=":material/visibility:", width="stretch", help="~~Select atleast 2 items to compare.~~ Work in progress feature.", disabled=True or sidebar_cart__sel_len<2):
+            #         st.switch_page(constants.PATH_PAGE_TF_COMPARE, query_params={"genus_nums": ",".join(sidebar_cart__sel_genus_nums)})
 
-            if st.button(f":red[:material/delete: Delete `{sidebar_cart__sel_len}` selected TFs]", type="secondary", width="stretch", help="Remove selected TFs from the cart.", disabled=sidebar_cart__sel_len==0):
+            if st.button(f":red[:material/delete: Delete **{sidebar_cart__sel_len}** selected TFs]", type="secondary", width="stretch", disabled=sidebar_cart__sel_len==0, help="Remove selected TFs from the cart."):
                 for genus_num in sidebar_cart__sel_genus_nums: cart.remove(genus_num)
                 st.session_state.update({"sidebar_cart__trigger": st.session_state.get("sidebar_cart__trigger", 0) + 1})
                 st.rerun()
 
         st.divider()
-        st.write(f"Click below to explore patterns occurring in the `{len(cart)}` TFs in the cart:")
+        st.write(f"Click below to explore patterns occurring in the :primary[**{len(cart)}**] TFs in the cart:")
 
         if st.button("Explore patterns", icon=":material/regular_expression:", width="stretch", type="primary"):
             st.switch_page(constants.PATH_PAGE_PATTERN_EXPLORER)#, query_params={"genus_nums": ",".join(sidebar_cart__sel_genus_nums)})
@@ -162,15 +162,15 @@ st.divider()
 st.header(":material/info: How to use", anchor=False)
 st.markdown(
 f"""
-You can use this Browser page to discover and search amongst all the `{len(tfclasses_df)}` TFs available on disk, which are :primary[listed above in the table].
+You can use this Browser page to discover and search amongst all the {len(tfclasses_df)} TFs available on disk, which are :primary[listed above in the table].
 
 To narrow down your search, you may use the :primary[filters]. There are two types:
-1. :primary[**Basic search**]: Search for one specific TF, either by its **Genus number** or **UniProt Accession** or **Genus name**
+1. :primary[**Basic search**]: Search for one specific TF, either by its **UniProt Accession**, **Genus number** or **Genus name**
 2. :primary[**Advanced search**]: List for all TFs which belong to a superclass/class/family/subfamily
 
 For each TF that you want to add to the Cart, click on the :primary[:material/check_box:] icon.
 
-The Cart is visible on the sidebar.
+The Cart is visible on the sidebar. You can do one of the following:
 - Select :primary[**1**] item in the Cart to :primary[**view its details**].
-- Select :primary[**2+**] items in the Cart to proceed to :primary[**Compare**] page (work in progress feature).
+- Click on :primary[**Explore patterns**] to explore the motifs occurring in all the TFs in the Cart.
 """)

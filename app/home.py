@@ -17,7 +17,7 @@ st.html(f"""
     {constants.APP_NAME} Browser!
 </h1>
 """)
-st.caption("A Consolidated database of Disorder, Patterns and Functional annotations of Human Transcription Factors", text_alignment="center")
+st.caption("A Consolidated database of Disorder, Patterns and Functional annotations of Transcription Factors", text_alignment="center")
 st.divider()
 
 #endregion
@@ -63,9 +63,16 @@ with st.container(width="stretch", horizontal=False):
     for genus_num in examples:
         st.page_link(
             constants.PATH_PAGE_TF_VIEW,
-            label=f":blue[:material/search:] {genus_num_name_map[genus_num]}",
+            label=f":green[:material/search:] {genus_num_name_map[genus_num]}",
             query_params={"genus_num": genus_num}
         )
+
+st.write("Or, browse all available TFs:")
+st.page_link(
+    constants.PATH_PAGE_TF_BROWSER,
+    label="TF Browser",
+    icon=":material/view_list:",
+)
 
 #endregion
 
@@ -75,12 +82,12 @@ st.divider()
 st.header(f":material/info: What is {constants.APP_NAME}?", anchor=False)
 st.markdown(f"""
     {constants.APP_NAME} is an integrated database and visualization platform
-    for human transcription factors (TFs). It combines curated information from
+    for transcription factors (TFs). It combines curated information from
     [UniProt](https://www.uniprot.org), [DisProt](https://disprot.org), and the
     [ELM Resource](http://elm.eu.org) with precomputed disorder predictions from
     [AIUPred](https://aiupred.elte.hu),
     [flDPnn](https://biomine.cs.vcu.edu/server-handler/?type=servers&target=flDPnn),
-    and [MetaPredict v3](https://metapredict.net). {constants.APP_NAME} enables
+    and [Metapredict v3](https://metapredict.net). {constants.APP_NAME} enables
     users to explore known functional motifs in sequence context, examine their
     distribution within DNA-binding and activation domains, identify shared
     motifs across TF sets, and investigate relationships between motif

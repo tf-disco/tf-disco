@@ -77,8 +77,8 @@ def __load_disprot_tfclasses_dfs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str
     tfclasses_df = tfclasses_df.drop("Genus_Num_Parts", axis=1)
 
     # 3. create title column
-    tfclasses_df["Name"] = tfclasses_df[["Genus_Num", "Genus_Name", "Uniprot_Acc"]].apply(
-        lambda row: f"{row['Genus_Num']} | {row['Uniprot_Acc']} | {row['Genus_Name']}",
+    tfclasses_df["Name"] = tfclasses_df[["Uniprot_Acc", "Genus_Num", "Genus_Name"]].apply(
+        lambda row: f"{row['Uniprot_Acc']} | {row['Genus_Num']} | {row['Genus_Name']}",
         axis=1
     )
 

@@ -72,6 +72,7 @@ with st.sidebar:
         }, axis=1)
         sidebar_cart__state = st.table(
             data=sidebar_cart,
+            hide_index=True,
             height=300 if len(sidebar_cart) > 5 else "content",
         )
 
@@ -187,7 +188,7 @@ else:
 
     col1.metric("ELM Accession", f"[{selected_pattern_df['ELM_Acc'].values[0]}](http://elm.eu.org/{selected_pattern_df['ELM_Acc'].values[0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern accession number, which uniquely identifies the pattern in the ELM database.")
     col2.metric("ELM ID", f"[{selected_pattern_df['ELM_Id'].values[0]}](http://elm.eu.org/elms/{selected_pattern_df['ELM_Id'].values[0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern ID, which uniquely identifies the pattern in the ELM database.")
-    col3.metric("Total Matches", f"{selected_pattern_df["Observed"].sum()}" + (f" out of {total_observed_counts}" if filt_to_cart else ""), border=True, help="The total number of matches of the pattern across all species.")
+    col3.metric("Observed Matches" + (" (in cart)" if filt_to_cart else ""), selected_pattern_df["Observed"].sum(), border=True, help="The number of matches of the pattern across all species.")
 
     @st.fragment(parallel=True)
     def pattern_logo_fragment(sequences: list[str]):
@@ -247,7 +248,7 @@ else:
 
         genus_nums = list(selected_pattern_df["Genus_Num"].unique())
         if filt_to_cart: genus_nums = [g for g in genus_nums if g in cart]
-        TFS_PER_PAGE = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None)
+        TFS_PER_PAGE = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
         NUM_PAGES = max(1, ceil(len(genus_nums) / TFS_PER_PAGE))
 
         page_top = st.pagination(
@@ -258,7 +259,7 @@ else:
             on_change=lambda: st.session_state.update({"pagination_bottom": st.session_state.get("pagination_top", 1)})
         )-1 if NUM_PAGES > 1 else 0
 
-        for genus_num in genus_nums[page_top*TFS_PER_PAGE:(page_top+1)*TFS_PER_PAGE]: # ! TODO: use `page_top` value
+        for genus_num in genus_nums[page_top*TFS_PER_PAGE:(page_top+1)*TFS_PER_PAGE]:
             tfinfo = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
             observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
 
@@ -283,6 +284,7 @@ else:
     with st.expander("Frequency of Matches per TF", expanded=True):
         with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
             st.subheader(f"Frequency of Matches per TF for pattern `{patterns__sel_pattern}`", anchor=False)
+
             st.write("Download:")
             st.download_button(
                 label=":material/download: TSV",
@@ -304,6 +306,7 @@ else:
                 "Genus Name": selected_pattern_df["Genus_Name"],
                 "Observed Matches": selected_pattern_df["Observed"],
             }, axis=1),
+            hide_index=True,
             height=500 if len(selected_pattern_df) > 10 else "content",
         )
 

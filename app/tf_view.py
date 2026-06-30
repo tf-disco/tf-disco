@@ -68,7 +68,8 @@ with st.sidebar:
     sidebar.render_tf_summary(tf_row, len(tf_sequence), tf_disprot_regions)
 
 # TF metrics cards
-st.header(f"{tf_genus_name}", anchor="selected_tf") #: {tf_genus_num} | {tf_genus_name} | [{tf_uniprot}](https://www.uniprot.org/uniprotkb/{tf_uniprot}/entry)")
+st.title(f"{tf_genus_name}", anchor="selected_tf")
+
 col11, col12 = st.columns(2, border=True)
 col21, col22 = st.columns(2, border=True)
 col11.metric(":material/link: UniProt Accession", f"**[{tf_uniprot}](https://www.uniprot.org/uniprotkb/{tf_uniprot}/entry)**", help="The unique identifier for this transcription factor in the UniProt database.")
@@ -140,6 +141,7 @@ default_cols: list[graph.ScoreName] = [
 with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
     with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Score Plots", anchor=False)
+
         st.write("Download all scores:")
         st.download_button(
             label=":material/download: TSV",
@@ -207,6 +209,7 @@ with st.expander("DisProt regions for selected TF", icon=":material/error_med:")
 with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view_timeline:"):
     with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Matches in ELM Patterns for selected TF")
+
         st.write("Download all matched sequences:")
         st.download_button(
             label=":material/download: TSV",
@@ -220,6 +223,7 @@ with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view
             file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.csv",
             mime="text/csv",
         )
+
     st.table(
         data=pd.concat({
             "ELM Accession": (tf_matches["ELM_Acc"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),

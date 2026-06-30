@@ -1,7 +1,7 @@
 [project]
 name = "tf-disco"
 version = "0.6.9"
-description = "TF-DISCO: A Consolidated database of Disorder, Patterns and Functional annotations of Human Transcription Factors"
+description = "TF-DISCO: A Consolidated database of Disorder, Patterns and Functional annotations of Transcription Factors"
 readme = "README.md"
 requires-python = "==3.13.*"
 dependencies = [

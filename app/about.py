@@ -19,14 +19,14 @@ st.html(f"""
     {constants.APP_NAME}!
 </h1>
 """)
-st.caption("A Consolidated Database of Human Transcription Factors Information", text_alignment="center")
+st.caption("A Consolidated Database of Transcription Factors Information", text_alignment="center")
 
 st.divider()
 
 #region Details
 st.header(f":material/info: What is {constants.APP_NAME}?", anchor=False)
 st.markdown(f"""
-    {constants.APP_NAME} is a comprehensive database and visualization tool for human
+    {constants.APP_NAME} is a comprehensive database and visualization tool for
     transcription factors (TFs). It integrates data from multiple sources,
     including [UniProt](https://www.uniprot.org),
     [DisProt](https://disprot.org), and the [ELM Resource](http://elm.eu.org),
