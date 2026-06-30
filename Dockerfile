@@ -14,9 +14,9 @@ FROM python:3.13-slim AS base
     RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/uv ["/uv", "sync"]
 
     # get muscle
-    ADD https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3 ./muscle
-    RUN chmod +x ./muscle
-    ENV MUSCLE_PATH=muscle
+    ADD https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3 /tf-disco-deps/muscle
+    RUN chmod +x /tf-disco-deps/muscle
+    ENV MUSCLE_PATH=/tf-disco-deps/muscle
 
     ENV IS_DOCKER=1
 
@@ -30,6 +30,8 @@ FROM python:3.13-slim AS base
         VOLUME ["/tf-disco-data"]
 
     FROM base AS stage_kaggle
+        # the ADD line is used to invalidate cache for the RUN layer https://stackoverflow.com/a/65762156
+        ADD "https://www.kaggle.com/datasets/joejojoestar/tf-disco-datasets" /tmp/bruh
         RUN python -c "import kagglehub; from app.utils.constants import KAGGLE_HANDLE; kagglehub.dataset_download(handle=KAGGLE_HANDLE)"
 
 FROM stage_${dataset_source} AS final

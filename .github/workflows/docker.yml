@@ -6,6 +6,16 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        include:
+          - image_ghcr: ghcr.io/${{ github.repository }}
+            image_dockerhub: joejojoestar/tf-disco
+            dockerfile: Dockerfile
+          - image_ghcr: ghcr.io/${{ github.repository }}-autoupdate
+            image_dockerhub: joejojoestar/tf-disco-autoupdate
+            dockerfile: Dockerfile.autoupdate
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -28,16 +38,17 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: |
-            joejojoestar/tf-disco
-            ghcr.io/${{ github.repository }}
+            ${{ matrix.image_ghcr }}
+            ${{ matrix.image_dockerhub }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker images
-        id: push
+        id: push_dockerfile
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: ./${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
