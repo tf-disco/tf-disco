@@ -1,10 +1,11 @@
+from typing import cast, Literal
+
 import streamlit as st
 import pandas as pd
 
 from app.utils import constants
 from app.utils import data_loading
 from app.utils import sidebar
-from app.utils import patterns
 from app.utils import helper
 from app.utils import graph
 
@@ -94,23 +95,54 @@ with st.sidebar:
 #endregion
 
 #region Sequence
-with st.expander("Sequence", icon=":material/genetics:", expanded=True):
-    sequence_html = helper.render_sequence(sequence=tf_sequence, pattern=selected_pattern, underline_data=tf_dbd_range_list)
-    sequence_fasta = f">{tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
-    st.write(f"{sequence_html}", unsafe_allow_html=True)
-    st.divider()
-    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
-        st.subheader("FASTA format")
+# with st.expander("Sequence", icon=":material/genetics:", expanded=True):
 
-        with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="left", width="content"):
-            st.download_button(
-                label=":material/download: FASTA",
-                data=sequence_fasta,
-                file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
-                mime="text/plain",
-            )
+st.divider()
 
-    st.code(sequence_fasta, language="plaintext", line_numbers=False, wrap_lines=False)
+with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
+    st.subheader("Sequence", anchor=False)
+
+    VHide = Literal[":material/visibility_off: Hide"]
+    VShow = Literal[":material/visibility: Show"]
+    V_HIDE: VHide = ":material/visibility_off: Hide"
+    V_SHOW: VShow = ":material/visibility: Show"
+
+    with st.popover(label="Annotations"):
+        annotations_dbd = st.pills(
+            label="DBD regions:",
+            selection_mode="single",
+            required=True,
+            default=V_HIDE,
+            options=[V_HIDE, V_SHOW],
+        ) != V_HIDE
+        st.write("Displays a **Black/White** overline above the residues which are part of DNA Binding Domains.")
+        annotations_disorder = cast(graph.ScoreName|VHide, st.pills(
+            label="Disorder predictors:",
+            selection_mode="single",
+            required=True,
+            default=V_HIDE,
+            options=[V_HIDE, "Aiupred-Disorder", "Fldpnn-Disorder", "Metapredict-Disorder"],
+            format_func=lambda score_name: graph.SCORE_PROPERTIES[score_name].display_name if score_name != V_HIDE else V_HIDE,
+        ))
+        st.write("Displays a :red[**Red**] underline for residues predicted to be disordered by the selected predictor.")
+
+st.write(helper.render_sequence(
+    sequence=tf_sequence,
+    pattern=selected_pattern,
+    dbd_ranges=helper.convert_ranges_to_array(tf_dbd_range_list, len(tf_sequence)) if annotations_dbd else None,
+    disorder_scores=tf_disorder_scores[annotations_disorder]>=(graph.SCORE_PROPERTIES[annotations_disorder].threshold) if annotations_disorder != V_HIDE else None,
+), unsafe_allow_html=True)
+
+sequence_fasta = f"> {tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
+with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
+    st.markdown("FASTA format:", width="stretch")
+    st.download_button(
+        label=":material/download: FASTA",
+        data=sequence_fasta,
+        file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
+        mime="text/plain",
+    )
+st.code(sequence_fasta, language="plaintext", line_numbers=False, wrap_lines=False)
 
 #endregion
 
@@ -118,11 +150,11 @@ st.divider()
 st.space(2)
 
 #region Disorder scores
-score_cols: list[graph.ScoreName] = [
+score_names_all: list[graph.ScoreName] = [
+    "HI",
     "Aiupred-Disorder",
     "Aiupred-Binding",
     "Aiupred-Linker",
-    "HI",
     "Fldpnn-Disorder",
     "Fldpnn-ProteinBinding",
     "Fldpnn-DnaBinding",
@@ -131,9 +163,9 @@ score_cols: list[graph.ScoreName] = [
     "Metapredict-Disorder",
 ]
 
-default_cols: list[graph.ScoreName] = [
-    "Aiupred-Disorder",
+score_names_default: list[graph.ScoreName] = [
     "HI",
+    "Aiupred-Disorder",
     "Fldpnn-Disorder",
     "Metapredict-Disorder",
 ]
@@ -156,10 +188,11 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
             mime="text/csv",
         )
 
-    display_scores = st.pills(
+    score_names_selected = st.pills(
         label="Select scores to display:",
-        options=score_cols,
-        default=st.session_state.get("scores_to_display", default_cols),
+        options=score_names_all,
+        format_func=lambda score_name: graph.SCORE_PROPERTIES[score_name].display_name,
+        default=st.session_state.get("scores_to_display", score_names_default),
         selection_mode="multi",
         key="scoresToDisplay",
         on_change=lambda: st.session_state.update({"scores_to_display": st.session_state["scoresToDisplay"]})
@@ -169,8 +202,8 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
         sequence=tf_sequence,
         scores_list=[
             graph.make_score_renderable(score_name, tf_disorder_scores)
-            for score_name in score_cols
-            if score_name in display_scores
+            for score_name in score_names_all
+            if score_name in score_names_selected
         ],
         dbd_ranges=tf_dbd_range_list,
         disprot_regions=tf_disprot_regions,

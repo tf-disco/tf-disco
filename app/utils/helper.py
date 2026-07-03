@@ -13,11 +13,24 @@ import re
 import streamlit as st
 import streamlit.elements.arrow
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
+
+from . import data_loading
 
 # ============================================================================ #
 
 #region Non-render
+def convert_ranges_to_array(ranges: list[tuple[int, int]], length: int):
+    """Convert a list of (start, end) tuples into a binary array of the given
+    length. Provide 1-based start and end positions. The returned array will be
+    0-based."""
+
+    arr = np.zeros(length, dtype=int)
+    for start, end in ranges:
+        arr[start-1:end] = 1
+    return arr
+
 def calculate_disprot_perc(ranges: pd.DataFrame, seq_len: int) -> float:
     """For the given list of DisProt regions, calculate the disordered
     percentage.
@@ -28,10 +41,10 @@ def calculate_disprot_perc(ranges: pd.DataFrame, seq_len: int) -> float:
 
     if seq_len <= 0: return 0.0
 
-    arr = np.zeros(seq_len, dtype=int)
-    for start, end in ranges[["Start", "End"]].astype(int).itertuples(index=False, name=None):
-        arr[start:end+1] = 1
-    return arr.sum() / seq_len
+    return convert_ranges_to_array(
+        ranges=list(ranges[["Start", "End"]].astype(int).itertuples(index=False, name=None)),
+        length=seq_len
+    ).sum() / seq_len
 
 def get_df_selected_rows(state: streamlit.elements.arrow.DataframeState) -> list[int]:
     """Shorthand for `state["selection"]["rows"]`, but with safety."""
@@ -118,47 +131,56 @@ def render_filter_controls(tfclasses_df: pd.DataFrame):
 
 # ============================================================================ #
 
-def render_sequence(sequence: str, pattern: str|None=None, underline_data: list[tuple[int,int]]|None=None) -> str:
+def __st_get_option(key: str, default=None):
+    """Get a Streamlit option, with a default value if the option is not set."""
+    try: return st.get_option(key)
+    except KeyError: return default
+
+def render_sequence(
+    sequence: str, pattern: str|None=None,
+    disorder_scores: pd.Series|NDArray|None=None,
+    dbd_ranges: pd.Series|NDArray|None=None,
+    theme: Literal["dark", "light"]|None=None,
+    ) -> str:
     """
     Get the chunked sequence block in HTML. Also highlights any matches of the
     provided pattern.
 
-    :param sequence: the full sequence to render
-    :param pattern: the regex pattern to highlight in the sequence. If None, no highlighting is done.
-    :param underline_data: a list of (start, end) tuples indicating regions to underline in the sequence.
-    :param color1: the primary color to use for highlighting
-    :param color2: the alternate color to use for highlighting
-    :return str: the rendered HTML string
+    :param sequence: Amino acid sequence.
+    :param pattern: The regex pattern to highlight in the sequence. If None, no highlighting is done.
+    :param disorder_scores: A list of (start, end) tuples indicating regions to overline in the sequence.
+    :param dbd_ranges: A list of (start, end) tuples indicating regions to underline in the sequence.
+    :param theme: The theme to use for rendering. If `None`, the current Streamlit theme is used.
     """
 
-    THEME = st.context.theme.type # ! TODO: explore CSS media query instead
-    COLOR_BACKGROUND = st.get_option(f"theme.{THEME}.backgroundColor")
-    BG1 = st.get_option(f"theme.{THEME}.greenColor")
-    FG1 = COLOR_BACKGROUND
-    # BG2 = st.get_option(f"theme.{THEME}.violetColor")
-    BG2 = f"color-mix(in srgb, {BG1} 50%, transparent)"
-    FG2 = "unset"
     GAP = "10px"
 
+    THEME = theme or st.context.theme.type or "light" # ! TODO: explore CSS media query instead
+
+    COLOR_BACKGROUND = __st_get_option(f"theme.{THEME}.backgroundColor", "#eff1f5")
+
+    COLOR_MATCH_1_BG = __st_get_option(f"theme.{THEME}.greenColor", "#40a02b")
+    COLOR_MATCH_1_FG = COLOR_BACKGROUND
+
+    COLOR_MATCH_2_BG = f"color-mix(in srgb, {COLOR_MATCH_1_BG} 50%, transparent)"
+    COLOR_MATCH_2_FG = "unset" # default (black/white as per theme)
+
+    COLOR_UNDERLINE = __st_get_option(f"theme.{THEME}.redColor", "#d20f39")
+
     # this array will hold the index of the match for each residue, or 0 if not matched
-    # use it for alternating colors
+    # use it to determine alternating colors
     residues_matched = np.zeros(len(sequence))
-    residues_underlined = np.zeros(len(sequence), dtype=bool)
+    residues_overline = dbd_ranges.astype(bool) if dbd_ranges is not None else np.zeros(len(sequence), dtype=bool)
+    residues_underline = disorder_scores.astype(bool) if disorder_scores is not None else np.zeros(len(sequence), dtype=bool)
 
     if pattern:
         try:
-            regex = re.compile(pattern)
-            for i, match in enumerate(regex.finditer(sequence), start=1):
-                for pos in range(match.start(), match.end()):
-                    residues_matched[pos] = i
+            for i, match in enumerate(re.finditer(pattern, sequence), start=1):
+                residues_matched[match.start():match.end()] = i
         except:
             pass
 
     html_chunks: list[str] = []
-
-    for start, end in (underline_data or []):
-        for pos in range(start - 1, end): # convert to 0-based index
-            residues_underlined[pos] = True
 
     for chunk_start in range(0, len(sequence), 10):
         chunk_chars = sequence[chunk_start:chunk_start+10]
@@ -171,33 +193,43 @@ def render_sequence(sequence: str, pattern: str|None=None, underline_data: list[
 
             if residues_matched[index] > 0:
                 class_name = "c1" if residues_matched[index] % 2 == 1 else "c2"
-                last_child = " l" if (index_within_chunk == len(chunk_chars) - 1) else ""
+                last_child = " l" if (index_within_chunk == len(chunk_chars) - 1) and (residues_matched[index+1:index+2].sum() == residues_matched[index]) else ""
                 html_chunk_char = f"""<span class="{class_name}{last_child}">{char}</span>"""
             else:
                 html_chunk_char = char
 
-            if residues_underlined[index]:
+            if residues_overline[index]:
+                html_chunk_char = f"""<span class="o">{html_chunk_char}</span>"""
+
+            if residues_underline[index]:
                 html_chunk_char = f"""<span class="u">{html_chunk_char}</span>"""
 
             html_chunk += html_chunk_char
 
+        pos = f"{(chunk_start + len(chunk_chars))}"
+        # render chunk position only if the number fits the width of the chunk
+        pos = f"{pos}" if len(chunk_chars) >= len(pos) else ""
+
         html_chunks.append(f"""
-<div class="chunk">
-    <span class="pos">{chunk_start + len(chunk_chars)}<br/></span>
+<span class="chunk">
+    <span class="pos">{pos}<br/></span>
     <span class="seq">{html_chunk}</span>
-</div>
+</span>
 """)
 
     style = f"""
 <style>
-    .rendered-sequence-container {{display: flex; flex-wrap: wrap; gap: {GAP}; align-items: flex-start;}}
+    .rendered-sequence-container {{display: flex; flex-wrap: wrap; gap: {GAP}; align-items: flex-start; padding: 0 0 1.5em 1.5em;}}
     .rendered-sequence-container .chunk {{display: flex; flex-direction: column; align-items: flex-end; font-family: monospace;}}
+
     .rendered-sequence-container .chunk .pos {{font-size: 0.8rem; opacity: 0.6; user-select: none;}}
-    .rendered-sequence-container .chunk .seq .c1 {{background-color: {BG1}; color: {FG1}; font-weight: bold; text-decoration-color: {BG1}; position: relative;}}
-    .rendered-sequence-container .chunk .seq .c2 {{background-color: {BG2}; color: {FG2}; font-weight: bold; text-decoration-color: {BG2}; position: relative;}}
-    .rendered-sequence-container .chunk .seq .c1.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {BG1};}}
-    .rendered-sequence-container .chunk .seq .c2.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {BG2};}}
-    .rendered-sequence-container .chunk .seq .u {{text-decoration: overline underline 2pt; text-underline-position: under;}}
+
+    .rendered-sequence-container .chunk .seq .c1 {{background-color: {COLOR_MATCH_1_BG}; color: {COLOR_MATCH_1_FG}; font-weight: bold; text-decoration-color: {COLOR_MATCH_1_BG}; position: relative;}}
+    .rendered-sequence-container .chunk .seq .c1.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {COLOR_MATCH_1_BG};}}
+    .rendered-sequence-container .chunk .seq .c2 {{background-color: {COLOR_MATCH_2_BG}; color: {COLOR_MATCH_2_FG}; font-weight: bold; text-decoration-color: {COLOR_MATCH_2_BG}; position: relative;}}
+    .rendered-sequence-container .chunk .seq .c2.l:after {{content: ''; display: block; position: absolute; top: 0; right: -{GAP}; width: {GAP}; height: 100%; background-color: {COLOR_MATCH_2_BG};}}
+    .rendered-sequence-container .chunk .seq .u {{text-decoration: underline 2pt; text-underline-position: under; text-decoration-color: {COLOR_UNDERLINE}}}
+    .rendered-sequence-container .chunk .seq .o {{text-decoration: overline 2pt;}}
 </style>
 """
 
