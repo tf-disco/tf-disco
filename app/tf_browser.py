@@ -138,12 +138,8 @@ with st.sidebar:
 
         # MARK: Cart | buttons
         with st.container(width="stretch", horizontal=True, horizontal_alignment="right"):
-            # if sidebar_cart__sel_len == 1:
             if st.button("View selected TF", icon=":material/visibility:", width="stretch", disabled=sidebar_cart__sel_len!=1):
                 st.switch_page(constants.PATH_PAGE_TF_VIEW, query_params={"genus_num": sidebar_cart__sel_genus_nums[0]})
-            # else:
-            #     if st.button(f"Compare :primary[**{sidebar_cart__sel_len}**] selected TFs", icon=":material/visibility:", width="stretch", help="~~Select atleast 2 items to compare.~~ Work in progress feature.", disabled=True or sidebar_cart__sel_len<2):
-            #         st.switch_page(constants.PATH_PAGE_TF_COMPARE, query_params={"genus_nums": ",".join(sidebar_cart__sel_genus_nums)})
 
             if st.button(f":red[:material/delete: Delete **{sidebar_cart__sel_len}** selected TFs]", type="secondary", width="stretch", disabled=sidebar_cart__sel_len==0, help="Remove selected TFs from the cart."):
                 for genus_num in sidebar_cart__sel_genus_nums: cart.remove(genus_num)

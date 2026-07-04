@@ -21,7 +21,6 @@ pages = [
     st.Page(constants.PATH_PAGE_HOME, icon=":material/home:", title="Home"),
     st.Page(constants.PATH_PAGE_TF_BROWSER, icon=":material/view_list:", title="TF Browser"),
     st.Page(constants.PATH_PAGE_TF_VIEW, icon=":material/visibility:", visibility="hidden", title="TF Viewer"),
-    st.Page(constants.PATH_PAGE_TF_COMPARE, icon=":material/visibility:", visibility="hidden", title="TF Compare"),
     st.Page(constants.PATH_PAGE_PATTERN_EXPLORER, icon=":material/regular_expression:", title="Pattern Explorer"),
     st.Page(constants.PATH_PAGE_HELP, icon=":material/help:", title="Help", url_path="help"),
     st.Page(constants.PATH_PAGE_ABOUT, icon=":material/info:", title="About"),

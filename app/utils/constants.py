@@ -59,9 +59,6 @@ PATH_PAGE_TF_BROWSER = PATH_ROOT / "app/tf_browser.py"
 PATH_PAGE_TF_VIEW = PATH_ROOT / "app/tf_view.py"
 """Path to the **TF Viewer** page."""
 
-PATH_PAGE_TF_COMPARE = PATH_ROOT / "app/tf_compare.py"
-"""Path to the **TF Compare** page."""
-
 PATH_PAGE_PATTERN_EXPLORER = PATH_ROOT / "app/pattern_explorer.py"
 """Path to the **Pattern Explorer** page."""
 
