@@ -361,7 +361,15 @@ def compute_pattern_scores(
     # calculate observed
     observed = matches_df.groupby("ELM_Acc").size().rename("Observed")
     scores = scores.join(observed, how="left", on="ELM_Acc")
-    scores["Observed"]  = scores["Observed"].fillna(0).astype(int)
+    scores["Observed"] = scores["Observed"].fillna(0).astype(int)
+    if len(scores) > 0:
+        scores = scores.merge(
+            matches_df.groupby("ELM_Acc").apply(lambda x: x["Genus_Num"].nunique()).rename("NumTFs").reset_index(drop=False),
+            how="left",
+            on="ELM_Acc",
+        )
+    else:
+        scores["NumTFs"] = 0
 
     # calculate scores
     scores["ZScore"] = (scores["Observed"] - scores["Expected"]) / np.sqrt(scores["Expected"])

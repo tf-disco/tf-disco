@@ -126,6 +126,7 @@ with st.expander(f"Select Patterns", icon=":material/view_timeline:", expanded=T
         "Observed": "Observed matches" + (" (in cart)" if filt_to_cart else ""),
         # "ZScore": None,
         # "Log2FC": None,
+        "NumTFs": "Count of TFs" + (" (in cart)" if filt_to_cart else ""),
     }
 
     if len(patterns_df) == 0:
