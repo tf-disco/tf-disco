@@ -237,6 +237,32 @@ def render_sequence(
     rendered = f"""{style}<div class="rendered-sequence-container">{"\n".join(html_chunks)}</div>"""
     return rendered
 
+@st.cache_data(persist="disk", show_spinner=True)
+def render_sequences_multiple_html(
+    genus_nums: list[str], pattern: str,
+    selected_pattern_df: pd.DataFrame,
+    theme: Literal["dark", "light"]|None=None,
+):
+    """`render_sequence()` with same pattern and multiple sequences. Returns a
+    full HTML document."""
+
+    html_list: list[str] = [
+        f"<h1>Matches for pattern {pattern}</h1>",
+    ]
+    sequence_dict = data_loading.init().sequence_dict
+
+    for genus_num in genus_nums:
+        tf_info = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
+        observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
+
+        html_list.append(f"""
+<h3>Matches for <a href="https://uniprot.org/entry/{tf_info.Uniprot_Acc}" target="_blank">{tf_info.Uniprot_Acc}</a> | genus <a href="https://tf-disco.com/tf_view?genus_num={genus_num}" target="_blank">{genus_num}</a> | {tf_info.Genus_Name}</h3>
+<p>Observed Matches: {observed_matches_count}</p>
+{render_sequence(sequence=tf_info.Sequence, pattern=pattern, theme=theme)}
+""")
+
+    return f"""<html><head><meta charset="UTF-8"><title>Matches for pattern {pattern}</title></head><body>{"<hr/>".join(html_list)}</body></html>"""
+
 # ============================================================================ #
 
 def render_vagueness_penalty_slider(key: str|None=None):

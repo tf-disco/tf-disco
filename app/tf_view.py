@@ -252,7 +252,7 @@ with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected
         )
         st.download_button(
             label=":material/download: CSV",
-            data=tf_matches.to_csv(index=False).encode("utf-8"),
+            data=tf_matches.to_csv(index=False).encode("utf-8-sig"),
             file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.csv",
             mime="text/csv",
         )
@@ -266,6 +266,11 @@ with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected
             "Matched Sequence": (tf_matches["Matched_Sequence"].astype(str)),
             "Start": (tf_matches["Start"].astype(str)),
             "End": (tf_matches["End"].astype(str)),
+            **{
+                graph.SCORE_PROPERTIES[name].display_name: (tf_matches[name].astype(str))
+                for name in cast(list[graph.ScoreName], ["Aiupred-Disorder", "Fldpnn-Disorder", "Metapredict-Disorder"])
+            },
+            "Domain": (tf_matches["Domain"].astype(str)),
         }, axis=1),
         hide_index=True,
         height=500 if len(tf_matches) > 5 else "content",

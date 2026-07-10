@@ -71,7 +71,7 @@ PATH_PAGE_HELP = PATH_ROOT / "app/about_help.py"
 #endregion
 
 #region Dataset
-KAGGLE_HANDLE = "joejojoestar/tf-disco-datasets/versions/1"
+KAGGLE_HANDLE = "joejojoestar/tf-disco-datasets/versions/3"
 """The Kaggle handle for the datasets."""
 
 class PathData:

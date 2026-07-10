@@ -236,13 +236,19 @@ else:
     #region Selected pattern: Matches in sequences
     # if cart and sequence_dict:
     with st.expander("Matches in Sequences", icon=":material/regular_expression:", expanded=False):
-    with st.expander("Matches in Sequences", expanded=False):
+        genus_nums = list(selected_pattern_df["Genus_Num"].unique())
+        if filt_to_cart: genus_nums = [g for g in genus_nums if g in cart]
+
         with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
             st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
+
             st.write("Download:")
             st.download_button(
                 label=":material/download: HTML",
-                data=selected_pattern_matches_df.to_html(index=False, escape=False).encode("utf-8"),
+                data=(lambda genus_nums,pattern,selected_pattern_df: (lambda:
+                    helper.render_sequences_multiple_html(genus_nums=genus_nums, pattern=pattern, selected_pattern_df=selected_pattern_df, theme="light").encode("utf-8")
+                ))(genus_nums, patterns__sel_pattern, selected_pattern_df),
+                # data=helper.render_sequences_matches(genus_nums, patterns__sel_pattern, selected_pattern_df, "light").encode("utf-8"),
                 file_name=f"pattern_{patterns__sel_elm_acc}_matches.html",
                 mime="text/html",
             )
@@ -254,13 +260,11 @@ else:
             )
             st.download_button(
                 label=":material/download: CSV",
-                data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8"),
+                data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8-sig"),
                 file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
                 mime="text/csv",
             )
 
-        genus_nums = list(selected_pattern_df["Genus_Num"].unique())
-        if filt_to_cart: genus_nums = [g for g in genus_nums if g in cart]
         TFS_PER_PAGE = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
         NUM_PAGES = max(1, ceil(len(genus_nums) / TFS_PER_PAGE))
 
