@@ -116,18 +116,21 @@ PATH_DATA = PathData(ENV_DATASET_PATH_OVERRIDE or Path("./data/")) # initial val
 
 #region Content
 CONTENT_SUMMARY = f"""
-{APP_NAME} is an integrated database and visualization platform
-for transcription factors (TFs). It combines curated information from
-[UniProt](https://www.uniprot.org), [DisProt](https://disprot.org), and the
-[ELM Resource](http://elm.eu.org) with precomputed disorder predictions from
-[AIUPred](https://aiupred.elte.hu),
+{APP_NAME} (:primary[T]ranscription :primary[F]actor identity,
+:primary[DIS]order, :primary[CO]ntext/motifs) is an integrated database and
+visualization platform for transcription factors (TFs). It combines curated
+information from [UniProt](https://www.uniprot.org),
+[DisProt](https://disprot.org), and the
+[Eukaryotic Linear Motif (ELM) Resource](http://elm.eu.org) with precomputed
+disorder predictions from [AIUPred](https://aiupred.elte.hu),
 [flDPnn](https://biomine.cs.vcu.edu/server-handler/?type=servers&target=flDPnn),
-and [Metapredict v3](https://metapredict.net). {APP_NAME} lets users
-explore known functional motifs in sequence context, examine their
-distribution within DNA-binding and activation domains, identify shared
-motifs across TF sets, and investigate relationships between motif occurrence
-and intrinsic disorder.
+and [Metapredict v3](https://metapredict.net). {APP_NAME} lets users explore
+known functional motifs in sequence context, examine their distribution within
+DNA-binding and activation domains, identify shared motifs across TF sets, and
+investigate relationships between motif occurrence and intrinsic disorder.
 """
+
+
 
 CONTENT_CONTACT = f"""
 For inquiries, feedback, or contributions, please reach out to us at
@@ -136,25 +139,101 @@ or make an [issue on GitHub](https://github.com/tf-disco/tf-disco/issues).
 We welcome your input and look forward to hearing from you!
 """
 
+
+
 CONTENT_HELP_TF_BROWSER = f"""
-You can use the :primary[:material/view_list: TF Browser] page to discover and search amongst all the TFs
-available, which are :primary[listed in the table].
+The user can use the :primary[:material/view_list: TF Browser] page to discover
+and search amongst all the TFs available, which are :primary[listed in the
+table].
 
-To narrow down a search, you can apply :primary[filters]. There are *two* types:
-1. :primary[**Basic search**]: Search for one specific TF, either by its **UniProt Accession**, **Genus number** or **Genus name**
-2. :primary[**Advanced search**]: List for all TFs which belong to a superclass/class/family/subfamily (refer to the [TFClass Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf) for details on TF classification)
+To narrow down a search, :primary[filters] can be applied. There are *two* types
+of search available:
+1. :primary[**Basic search**]: Search for one specific TF, either by its
+   **UniProt Accession**, **Genus number** or **Genus name**
+2. :primary[**Advanced search**]: List all TFs which belong to a specific
+   superclass/class/family/subfamily (refer to the [TFClass
+   Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf) for details
+   on TF classification)
 
-For each TF that you want to add to the Cart, click on the :primary[:material/check_box:] icon.
+To add a TF to the Cart, click on the :primary[:material/check_box:] icon.
 
-Once TFs are selected, the Cart will be visible on the sidebar and you can do one of the following:
+Once TFs are selected, the Cart will be visible on the sidebar. One of the
+following can be done:
 - Select :primary[**1**] item in the Cart to :primary[**view its details**].
-- Click on the :primary[:material/regular_expression: **Explore patterns**] button to explore the motifs occurring in all the TFs in the Cart.
+- Click on the :primary[:material/regular_expression: **Explore patterns**]
+  button to explore the motifs occurring in all the TFs in the Cart.
 """
 
-CONTENT_HELP_PATTERN_EXPLORER = f"""
-Shows patterns found across the TFs in your cart (or across the whole database).
-Filter to patterns common to all cart TFs, and adjust the vagueness penalty slider to prioritize more specific patterns. Select a pattern to see its regex, a consensus sequence logo, every matching sequence, and how often it occurs in each TF.
+
+
+CONTENT_HELP_TF_VIEWER = f"""
+This page shows the information of the selected TF. Basic info such as
+UniProt accession number, DisProt ID (if exists), length of sequence, and the
+ranges of positions marked as DNA Binding Domains (DBD) is shown.
+
+The sequence is rendered 10-residue-long blocks. The sequence can be downloaded
+in the FASTA format, if desired. There are two annotations which can be enabled
+on the sequence:
+1. DBD regions, denoted by a **Black/White** overline above the residues which
+   are part of the DNA Binding Domains
+2. Disorder predictors, denoted by a :red[Red] underline on residues which are
+   predicted to be disordered. More on this below.
+
+The Score Plots section displays a graph/plot of the metrics listed below. The
+graph is interactive, and the user can make a selection with the mouse to zoom
+in. Optionally, the scores can also be correlated with DisProt regions, by
+showing bars under each graph to denote whether it agrees with DisProt or not.
+The scores are available for download in tabular format (CSV/TSV), which
+contains the per-residue scores for each of the metrics listed below.
+- :primary[Hydropathy Index]: Kyte-Doolittle scale with window size 11
+- :primary[AIUPred]: Disorder, Binding, Linker
+- :primary[flDPnn]: Disorder, Protein binding, DNA binding, RNA binding, Linker
+- :primary[Metapredict v3]: Disorder
+- DisProt regions
+- DBD ranges
+
+The evidences of regions marked by DisProt can be viewed by the user in the
+table below the graphs. The data from this table is obtained fully from the
+DisProt database.
+
+On the left sidebar, a table displays the ELM patterns that have matches
+occurring in the currently selected TF. Click on the
+:primary[:material/check_box:] checkbox next to a pattern to highlight its
+matches in the sequence.
 """
+
+
+
+def CONTENT_HELP_PATTERN_EXPLORER(is_on_help_page: bool=False):
+    return f"""
+The user can use the :primary[:material/regular_expression: Pattern Explorer]
+page to explore the patterns/motifs occurring in a selection of TFs, or in the
+entire dataset. The selection of TFs i.e. the cart can be made in the
+:primary[:material/view_list: TF Browser] page first.
+
+The table displays the ELM patterns which are available in the selected TFs. To
+select a pattern for further analysis, click on the
+:primary[:material/check_box:] checkbox next to the pattern.\\
+These patterns are ranked with the help of the vagueness metric as described
+{"[above](#vagueness)" if is_on_help_page else "in the [Help page](/help#vagueness)"}.
+
+The sequence logo of the selected pattern is displayed below the table. Multiple
+sequence alignment is performed using the [MUSCLE](https://drive5.com/muscle5)
+tool. The sequence logo is generated using these
+aligned sequences, which denotes the conservation of the pattern across the TFs.
+
+The user can also visualize the sites in the TF's sequences where the pattern
+occurs, where these sites are highlighted with a color. The user can choose to
+download this data in the following formats:
+1. HTML format, as shown on the page
+2. Tabular format (CSV/TSV) where each row describes a matched site, along with
+   whether the match is disordered or not, and whether it is part of the DNA Binding Domains (DBD).
+
+Finally, the user can also view the frequency of the pattern's occurrences in
+each TF, which is also available for download in tabular (CSV/TSV) format.
+"""
+
+
 
 CONTENT_DEVS = """
 Website developed by:

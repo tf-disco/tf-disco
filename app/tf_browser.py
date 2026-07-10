@@ -63,9 +63,9 @@ cart: set[str] = st.session_state["cart"]
 
 #region Catalog render
 if (option and filter_by) or filter_disprot:
-    st.write(f"Displaying :primary[**{len(catalog_filt)}**] out of :primary[**{len(tfclasses_df)}**] TFs (after filtering):")
+    st.write(f"Displaying :primary[**{len(catalog_filt)}**] out of :primary[**{len(tfclasses_df)}**] Transcription Factors (TFs) (after filtering):")
 else:
-    st.write(f"Displaying :primary[**{len(tfclasses_df)}**] TFs:")
+    st.write(f"Displaying :primary[**{len(tfclasses_df)}**] Transcription Factors (TFs):")
 
 # Add all variables to this list, such that when they change, it should trigger a re-render of the df:
 catalog_filt__dependencies: str = "-".join(map(str, [
@@ -83,7 +83,7 @@ catalog_filt__state = st.dataframe(
         "Genus_Num": "Genus Number",
         "Uniprot_Acc": "UniProt Accession",
         "Genus_Name": "Genus Name",
-        "Dbd_Range": "DBD Range",
+        "Dbd_Range": "DNA Binding Domains (DBD)",
         # "Disprot_Available": "DisProt data available?",
         "Disprot_Perc": st.column_config.ProgressColumn("Disordered content (as per DisProt)", min_value=0.0, max_value=1.0,),
     },

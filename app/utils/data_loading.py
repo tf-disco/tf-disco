@@ -42,12 +42,12 @@ def __global_state() -> dict[str, Any]:
 def __initialize_dataset():
     """Downloads the dataset from Kaggle, and sets the paths in `constants.PATH_DATA`."""
     if constants.ENV_DATASET_PATH_OVERRIDE and constants.ENV_DATASET_PATH_OVERRIDE.is_dir():
-        print(f"Using dataset path from environment variable: {constants.ENV_DATASET_PATH_OVERRIDE}")
+        print(f"Using dataset path from environment variable: {constants.ENV_DATASET_PATH_OVERRIDE}", flush=True)
         base_dir = constants.ENV_DATASET_PATH_OVERRIDE
     else:
-        print("Downloading dataset from Kaggle...")
+        print("Downloading dataset from Kaggle...", flush=True)
         base_dir = Path(kagglehub.dataset_download(handle=constants.KAGGLE_HANDLE))
-        print("Download complete!")
+        print("Download complete!", flush=True)
     constants.PATH_DATA.set_base_dir(base_dir)
 
 # @st.cache_data(show_spinner="Loading DisProt and TFClasses data...")

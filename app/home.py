@@ -35,7 +35,7 @@ genus_num_name_map = data.genus_num_name_map
 
 #region Search
 st.header(":material/search: Search for a TF", anchor=False)
-st.write("Search by UniProt accession, Genus number, or Genus name:")
+st.write("Search by [UniProt accession](https://www.uniprot.org/help/accession_numbers), Genus number, or Genus name (derived from the [TFClass Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf)):")
 with st.container(width="stretch", horizontal=True, horizontal_alignment="distribute"):
     searched_tf: str|None = st.selectbox(
         label="Search by UniProt accession, Genus number, or Genus name:",
@@ -44,10 +44,9 @@ with st.container(width="stretch", horizontal=True, horizontal_alignment="distri
         format_func=lambda genus_num: genus_num_name_map.get(genus_num, genus_num), # type: ignore
         placeholder="Start typing...",
         index=None,
-        help="You can search by typing in a [UniProt accession](https://www.uniprot.org/help/accession_numbers), [Genus number](http://tfclass.bioinf.med.uni-goettingen.de/about.jsf), or [Genus name](http://tfclass.bioinf.med.uni-goettingen.de/about.jsf) found in the [TFClass Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf).",
     )
     if st.button(
-        label="Go to Viewer",
+        label="Go to TF Viewer",
         icon=":material/search:",
         disabled=not searched_tf,
         type="primary",
@@ -59,7 +58,7 @@ with st.container(width="stretch", horizontal=True, horizontal_alignment="distri
 
 with st.container(width="stretch", horizontal=False):
     st.write("Or, try out an example:")
-    examples = ["1.1.1.2.3", "1.1.7.1.1", "2.1.2.4.3"]
+    examples = ["3.7.1.6.2", "4.1.6.1.1", "2.1.2.4.3"]
     for genus_num in examples:
         st.page_link(
             constants.PATH_PAGE_TF_VIEW,

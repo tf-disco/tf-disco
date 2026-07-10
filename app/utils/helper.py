@@ -119,6 +119,7 @@ def render_filter_controls(tfclasses_df: pd.DataFrame):
             default="Subfamily",
             required=True,
             selection_mode="single",
+            help="List all TFs which belong to a specific superclass/class/family/subfamily (refer to the [TFClass Resource](http://tfclass.bioinf.med.uni-goettingen.de/index.jsf) for details on TF classification)",
         ) # type: ignore because narrowing from str to `FilterBy`
         selected_option2 = render_search_dropdown(tfclasses_df, filter_by2, "option2")
 
@@ -246,7 +247,23 @@ def render_vagueness_penalty_slider(key: str|None=None):
 
     return st.slider(
         "Vagueness Penalty", min_value=1.0, max_value=10.0, value=2.25, step=0.25,
-        help="Vagueness is a measure of how specific a pattern is, with lower values indicating more specific patterns. A penalty may be applied to highly vague patterns.\n\nIncreasing this penalty allows you to focus on patterns that are more likely to be biologically meaningful.\n\nSet to 1.0 to not apply any penalty.\n\nNote that this is only used to rank the patterns for convenience purposes, and it doesn't affect the actual pattern matching.",
+        help="""
+Vagueness is a measure of how specific a pattern is, with higher values
+indicating "vague" patterns, and lower values indicating more "specific"
+patterns (this value is internally calculated, and not shown in the table).
+
+Using this slider, a :primary[**penalty**] may be applied to :primary[**highly
+vague**] patterns. Higher penalty allows the user to focus on patterns that are
+more likely to be biologically meaningful.
+
+Set to 1.0 to not apply any penalty.
+
+Note that this is only used to rank the patterns for convenience purposes, and
+it doesn't affect the actual pattern matching, and it doesn't discard any
+patterns.
+
+For a detailed explanation, please visit the [Help page](/help#vagueness).
+""",
         key=key,
     )
 

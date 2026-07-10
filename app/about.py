@@ -20,7 +20,7 @@ st.html(f"""
     {constants.APP_NAME}!
 </h1>
 """)
-st.caption("A Consolidated Database of Transcription Factors Information", text_alignment="center")
+st.caption("A Consolidated database of Disorder, Patterns and Functional annotations of Transcription Factors", text_alignment="center")
 
 #endregion
 
@@ -44,11 +44,11 @@ st.markdown(f"""
 
 - **:primary[:material/shopping_cart: Cart system].** The user can select TFs of
   interest, and add them to a "cart". This selection can be used to perform a
-  more narrowed-down analysis on the patterns/motifs occuring in them.
+  more narrowed-down analysis on the patterns/motifs occurring in them.
 
 - **:primary[:material/assignment: Per-TF analysis].** For a selected TF, the
   user can view its full sequence, highlight the patterns found in that
-  sequence, visualize & plot the per-resisude disorder propensity scores, and
+  sequence, visualize & plot the per-residue disorder propensity scores, and
   observe where each pattern falls relative to the DNA-binding domain and
   activation domain.
 
@@ -93,7 +93,7 @@ st.divider()
 #region Help
 st.header(":primary[:material/help:]**Help**", anchor="help")
 st.markdown(f"""
-{constants.APP_NAME} is organized into a few pages, and you can perform the
+{constants.APP_NAME} is organized into a few pages, and the user can perform the
 following workflow:
 1. Browse and discover available TFs
 2. Analyze a particular TF in detail

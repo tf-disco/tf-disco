@@ -44,10 +44,10 @@ if ("genus_num" not in st.query_params) or (tf_row is None):
 
 
 
-tf_genus_num: str = tf_row["Genus_Num"]
-tf_uniprot: str = tf_row["Uniprot_Acc"]
-tf_genus_name: str = tf_row["Genus_Name"]
-tf_dbd_range: str = tf_row["Dbd_Range"]
+tf_genus_num: str = tf_row["Genus_Num"].strip()
+tf_uniprot: str = tf_row["Uniprot_Acc"].strip()
+tf_genus_name: str = tf_row["Genus_Name"].strip()
+tf_dbd_range: str = tf_row["Dbd_Range"].strip()
 tf_sequence: str = sequence_dict[tf_genus_num].Sequence
 st.set_page_config(page_title=f"{tf_genus_name} | {constants.APP_NAME}")
 
@@ -59,7 +59,7 @@ tf_disorder_scores = data_loading.load_disorder_scores(tf_genus_num)
 tf_matches = matches_df[matches_df["Genus_Num"] == tf_genus_num]
 """Matches occurring ONLY in this TF."""
 
-# Parse the DBD range string into a list of (start, end) tuples (used for pltting in the graph)
+# Parse the DBD range string into a list of (start, end) tuples (used for plotting in the graph)
 tf_dbd_range_list = helper.parse_dbd_ranges(tf_dbd_range)
 
 #endregion
@@ -69,14 +69,14 @@ with st.sidebar:
     sidebar.render_tf_summary(tf_row, len(tf_sequence), tf_disprot_regions)
 
 # TF metrics cards
-st.title(f"{tf_genus_name}", anchor="selected_tf")
+st.title(f"{tf_genus_num} | {tf_genus_name}", anchor="selected_tf")
 
 col11, col12 = st.columns(2, border=True)
 col21, col22 = st.columns(2, border=True)
 col11.metric(":material/link: UniProt Accession", f"**[{tf_uniprot}](https://www.uniprot.org/uniprotkb/{tf_uniprot}/entry)**", help="The unique identifier for this transcription factor in the UniProt database.")
 col12.metric(":material/error_med: DisProt ID", f"**[{tf_disprot_id}](https://disprot.org/{tf_disprot_id})**" if not tf_disprot_regions.empty else "N/A", help="The unique identifier for this transcription factor in the DisProt database. Click the link to view more details about the disordered regions in this TF.")
 col21.metric(":material/straighten: Sequence length", f"**{len(tf_sequence)} residues**", help="The number of amino acids in this transcription factor's sequence.")
-col22.metric(":material/format_list_numbered: DBD Range(s)", f"**{tf_dbd_range}**", help="The range of amino acids that correspond to the DNA-binding domain (DBD) of this transcription factor. This is the region that interacts with DNA to regulate gene expression.")
+col22.metric(":material/format_list_numbered: DNA Binding Domain" + ("s" if len(tf_dbd_range_list)!=1 else ""), f"**{tf_dbd_range}**" if tf_dbd_range else "N/A", help="The range of amino acids that correspond to the DNA-binding domain (DBD) of this transcription factor. This is the region that interacts with DNA to regulate gene expression.")
 
 #endregion
 
@@ -133,7 +133,7 @@ st.write(helper.render_sequence(
     disorder_scores=tf_disorder_scores[annotations_disorder]>=(graph.SCORE_PROPERTIES[annotations_disorder].threshold) if annotations_disorder != V_HIDE else None,
 ), unsafe_allow_html=True)
 
-sequence_fasta = f"> {tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
+sequence_fasta = f">{tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
 with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
     st.markdown("FASTA format:", width="stretch")
     st.download_button(
@@ -239,7 +239,7 @@ with st.expander("DisProt regions for selected TF", icon=":material/error_med:")
 # ? NOTE: We'll NOT remove patterns with only 1 match, since that pattern might
 # have more matches in other TFs as well.
 
-with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view_timeline:"):
+with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected TF", icon=":material/view_timeline:"):
     with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Matches in ELM Patterns for selected TF")
 
@@ -262,6 +262,7 @@ with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view
             "ELM Accession": (tf_matches["ELM_Acc"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
             "ELM ID": (tf_matches["ELM_Id"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
             "Regex": (tf_matches["Regex"].apply(lambda x: f"`{x}`")),
+            "": pd.Series([]),
             "Matched Sequence": (tf_matches["Matched_Sequence"].astype(str)),
             "Start": (tf_matches["Start"].astype(str)),
             "End": (tf_matches["End"].astype(str)),
@@ -271,3 +272,8 @@ with st.expander("Matches in ELM Patterns for selected TF", icon=":material/view
     )
 
 #endregion
+
+st.divider()
+
+st.header(":material/help: Help", anchor=False)
+st.markdown(constants.CONTENT_HELP_TF_VIEWER)

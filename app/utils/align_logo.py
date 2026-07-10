@@ -35,11 +35,11 @@ def get_muscle_path() -> Path:
         pass
 
     if constants.ENV_MUSCLE_PATH and constants.ENV_MUSCLE_PATH.is_file():
-        print(f"Using MUSCLE path from environment variable: {constants.ENV_MUSCLE_PATH}")
+        print(f"Using MUSCLE path from environment variable: {constants.ENV_MUSCLE_PATH}", flush=True)
         st.session_state.muscle_path = constants.ENV_MUSCLE_PATH
         return constants.ENV_MUSCLE_PATH
 
-    print("Downloading MUSCLE from GitHub...")
+    print("Downloading MUSCLE from GitHub...", flush=True)
     with st.spinner("Loading MUSCLE. This shouldn't take too long...", show_time=True):
         try:
             muscle_path_str, _ = urllib.request.urlretrieve(URL)
@@ -90,8 +90,8 @@ def run_muscle_alignment(sequences: list[str]):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         if PRINT_ON_ERROR:
-            print(f"====== MUSCLE stdout ======\n{result.stdout}\n")
-            print(f"====== MUSCLE stderr ======\n{result.stderr}\n")
+            print(f"====== MUSCLE stdout ======\n{result.stdout}\n", flush=True)
+            print(f"====== MUSCLE stderr ======\n{result.stderr}\n", flush=True)
         raise ChildProcessError(f"ERROR: MUSCLE alignment failed with return code {result.returncode}. Input file: {Path(file_muscle_in.name).name}, Output file: {Path(file_muscle_out.name).name}")
 
 

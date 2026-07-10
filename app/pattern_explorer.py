@@ -23,7 +23,7 @@ st.html(f"""
     {constants.APP_NAME}
 </h1>
 """)
-st.caption("Explore and analyze patterns occuring in TFs", text_alignment="center")
+st.caption("Explore and analyze patterns occurring in Transcription Factors", text_alignment="center")
 
 with st.sidebar:
     st.empty()
@@ -84,7 +84,7 @@ with st.sidebar:
 
 
 
-with st.expander(f"Select Patterns", expanded=True):
+with st.expander(f"Select Patterns", icon=":material/view_timeline:", expanded=True):
     #region Filter controls
     with st.container(horizontal=True, horizontal_alignment="distribute"):
         with st.container(horizontal=False, horizontal_alignment="left", width="content"):
@@ -121,15 +121,20 @@ with st.expander(f"Select Patterns", expanded=True):
         "ELM_Acc": "ELM Accession",
         "ELM_Id": "ELM ID",
         "Regex": "Regex",
-        "Vagueness": None,
-        "Expected": None,
+        # "Vagueness": None,
+        # "Expected": None,
         "Observed": "Observed matches" + (" (in cart)" if filt_to_cart else ""),
-        "ZScore": None,
-        "Log2FC": None,
+        # "ZScore": None,
+        # "Log2FC": None,
     }
 
     if len(patterns_df) == 0:
-        st.warning("No patterns found. Try adding more TFs to the cart, or adjusting the settings above.")
+        st.warning("".join([
+            "No patterns found",
+            " that occur in strictly all the TFs" if strictly_in_all_tfs else "",
+            " in cart" if filt_to_cart else "",
+            ". Try adjusting the settings above."
+        ]))
         patterns__sel_row, patterns__sel_elm_acc = None, None
     else:
         patterns__dependencies = "-".join(map(str, [
@@ -169,7 +174,7 @@ if patterns__sel_row is None:
 
     st.divider()
     st.header(":material/help: Help", anchor=False)
-    st.markdown(constants.CONTENT_HELP_PATTERN_EXPLORER)
+    st.markdown(constants.CONTENT_HELP_PATTERN_EXPLORER(is_on_help_page=False))
 
 else:
     st.header(":material/regular_expression: Selected pattern", anchor=False)
@@ -188,7 +193,7 @@ else:
         selected_pattern_df = selected_pattern_df[selected_pattern_df["Genus_Num"].isin(cart)]
 
     with st.sidebar:
-        sidebar.render_pattern_summary(patterns__sel_row)
+        sidebar.render_pattern_summary(patterns__sel_row, in_cart=filt_to_cart, show_count_of_tfs=True)
 
     col1, col2, col3 = st.columns(3)
 
@@ -229,6 +234,7 @@ else:
 
     #region Selected pattern: Matches in sequences
     # if cart and sequence_dict:
+    with st.expander("Matches in Sequences", icon=":material/regular_expression:", expanded=False):
     with st.expander("Matches in Sequences", expanded=False):
         with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
             st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
@@ -266,13 +272,13 @@ else:
         )-1 if NUM_PAGES > 1 else 0
 
         for genus_num in genus_nums[page_top*TFS_PER_PAGE:(page_top+1)*TFS_PER_PAGE]:
-            tfinfo = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
+            tf_info = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
             observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
 
             st.divider()
-            st.subheader(f"Matches for genus `{genus_num}` | [`{tfinfo.Uniprot_Acc}`](https://uniprot.org/entry/{tfinfo.Uniprot_Acc}) | {tfinfo.Genus_Name}", anchor=False)
+            st.subheader(f"Matches for [{tf_info.Uniprot_Acc}](https://uniprot.org/entry/{tf_info.Uniprot_Acc}) | genus {genus_num} | {tf_info.Genus_Name}", anchor=False)
             st.write(f"Observed Matches: {observed_matches_count}")
-            st.markdown(helper.render_sequence(sequence=tfinfo.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
+            st.markdown(helper.render_sequence(sequence=tf_info.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
             st.space(size="small")
 
         page_bot = st.pagination(
@@ -287,7 +293,7 @@ else:
 
     #region Selected pattern: Matches
     selected_pattern_df = selected_pattern_df.drop(columns=["Regex", "ELM_Acc", "ELM_Id"])
-    with st.expander("Frequency of Matches per TF", expanded=True):
+    with st.expander("Frequency of Matches per TF", icon=":material/bar_chart:", expanded=True):
         with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
             st.subheader(f"Frequency of Matches per TF for pattern `{patterns__sel_pattern}`", anchor=False)
 

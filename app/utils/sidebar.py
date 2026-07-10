@@ -24,10 +24,10 @@ def render_tf_summary(tfclass_row: pd.Series, length: int, disprot_regions: pd.D
         columns: `Region_Id`, `Start`, `End`.
     """
 
-    selected_genus_num: str = tfclass_row["Genus_Num"]
-    selected_uniprot: str = tfclass_row["Uniprot_Acc"]
-    selected_genus_name: str = tfclass_row["Genus_Name"]
-    dbd_ranges: str = tfclass_row["Dbd_Range"]
+    selected_genus_num: str = tfclass_row["Genus_Num"].strip()
+    selected_uniprot: str = tfclass_row["Uniprot_Acc"].strip()
+    selected_genus_name: str = tfclass_row["Genus_Name"].strip()
+    dbd_ranges: str = tfclass_row["Dbd_Range"].strip()
     disprot_id = disprot_regions.iloc[0]["Region_Id"].split("r")[0] if not disprot_regions.empty else "N/A"
     disprot_regions_unique = len(disprot_regions[["Start", "End"]].drop_duplicates())
 
@@ -38,8 +38,8 @@ def render_tf_summary(tfclass_row: pd.Series, length: int, disprot_regions: pd.D
             ":material/numbers: Genus number": selected_genus_num,
             ":material/immunology: Genus name": selected_genus_name,
             ":material/straighten: Length": f"{length} residues",
-            ":material/format_list_numbered: DBD range(s)": dbd_ranges,
-            ":material/error_med: DisProt": f"[{disprot_id}](https://disprot.org/{disprot_id}) ({disprot_regions_unique} distinct regions)" if not disprot_regions.empty else "N/A",
+            ":material/format_list_numbered: DBD range(s)": dbd_ranges or "N/A",
+            ":material/error_med: DisProt": f"[{disprot_id}](https://disprot.org/{disprot_id}) ({disprot_regions_unique} regions)" if not disprot_regions.empty else "N/A",
         },
         border="horizontal",
         width="content",
@@ -49,7 +49,7 @@ def render_tf_summary(tfclass_row: pd.Series, length: int, disprot_regions: pd.D
 
 # ============================================================================ #
 
-def render_pattern_summary(pattern_row: pd.Series):
+def render_pattern_summary(pattern_row: pd.Series, in_cart: bool=False, show_count_of_tfs: bool=True):
     """Render the summary of the selected pattern.
 
     :param pattern_row: Expected columns: `pattern_row`: `Regex`, `Expected`,
@@ -62,10 +62,10 @@ def render_pattern_summary(pattern_row: pd.Series):
             ":material/link: ELM ID": f"[{pattern_row["ELM_Id"]}](http://elm.eu.org/elms/{pattern_row["ELM_Acc"]})",
             ":material/regular_expression: Regex": f"`{pattern_row["Regex"]}`",
             # ":material/numbers: Expected matches": f"{pattern_row["Expected"]:.2f}",
-            ":material/numbers: Observed matches": f"{pattern_row['Observed']}",
+            ":material/numbers: Observed matches" + (" (in cart)" if in_cart else ""): f"{pattern_row['Observed']}",
             # ":material/vital_signs: Z-score": f"{pattern_row['ZScore']:.4f}",
             # ":material/vital_signs: Log2FC": f"{pattern_row['Log2FC']:.4f}",
-        },
+        } | ({":material/straighten: Count of TFs" + (" (in cart)" if in_cart else ""): f"{pattern_row['NumTFs']}"} if show_count_of_tfs else {}),
         border="horizontal",
         width="content",
         hide_header=True,
@@ -107,7 +107,7 @@ def render_pattern_selector(matches: pd.DataFrame, selected_genus_num: str) -> t
         patterns__sel_row = patterns_df.iloc[patterns__sel_row_indices[0]]
         selected_pattern__str: str = patterns__sel_row["Regex"]
 
-        render_pattern_summary(patterns__sel_row)
+        render_pattern_summary(patterns__sel_row, in_cart=False, show_count_of_tfs=False)
 
         return patterns_df, selected_pattern__str
 
