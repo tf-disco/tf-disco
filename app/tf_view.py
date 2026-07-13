@@ -198,6 +198,11 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
         on_change=lambda: st.session_state.update({"scores_to_display": st.session_state["scoresToDisplay"]})
     )
 
+    compare_with_disprot = st.toggle(
+        label=f'Compare scores with :color[DisProt]{{foreground="{graph.COLOR_DISPROT}"}} regions',
+        help="Enable this to plot a bar below the graph of each score.\n\nIt marks wherever a region is identified as disordered by DisProt AND where the score says it's disordered.",
+    )
+
     fig = graph.create_scores_plotly(
         sequence=tf_sequence,
         scores_list=[
@@ -207,6 +212,7 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
         ],
         dbd_ranges=tf_dbd_range_list,
         disprot_regions=tf_disprot_regions,
+        compare_with_disprot=compare_with_disprot,
     )
     st.plotly_chart(fig)
 

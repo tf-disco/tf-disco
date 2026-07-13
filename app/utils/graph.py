@@ -82,7 +82,7 @@ def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | No
 
 # ============================================================================ #
 
-def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ranges: list[tuple[int, int]], disprot_regions: pd.DataFrame):
+def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ranges: list[tuple[int, int]], disprot_regions: pd.DataFrame, compare_with_disprot: bool=True):
     """
     Create a Plotly Figure for plotting the given list of scores.
 
@@ -90,6 +90,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
     :param list[Score|None] scores_list: list of scores you wanna plot. `None`s are skipped. Refer to `make_score_renderable()`.
     :param list[tuple[int, int]] dbd_ranges: list of (start, end) positions (1-based) for the DBD range.
     :param pd.DataFrame disprot_regions: df with columns: `Region_Id`, `Start`, `End`
+    :param bool compare_with_disprot: whether to render DisProt compare bars below each graph
     """
 
     CAP_LENGTH = 0.25
@@ -346,7 +347,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         fig.layout.annotations[len(scores) + 1 + 1 - 1].font.color = COLOR_DISPROT # type: ignore
 
         # For each score row, add "in DisProt + above threshold" highlight segments
-        for row, score in enumerate(scores, start=1):
+        for row, score in enumerate(scores if compare_with_disprot else [], start=1):
             vals = np.asarray(score.values)
             n = min(len(vals), len(disprot_mask))
 
