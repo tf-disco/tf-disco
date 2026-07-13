@@ -46,8 +46,21 @@ def __initialize_dataset():
         base_dir = constants.ENV_DATASET_PATH_OVERRIDE
     else:
         print("Downloading dataset from Kaggle...", flush=True)
-        base_dir = Path(kagglehub.dataset_download(handle=constants.KAGGLE_HANDLE))
+        err = None
+        base_dir = None
+        for attempt in range(3)[::-1]:
+            try:
+                base_dir = Path(kagglehub.dataset_download(handle=constants.KAGGLE_HANDLE))
+
+                # try reading a file, just to test it...
+                path_data_temp = constants.PathData(base_dir)
+                pd.read_csv(path_data_temp.TFCLASSES, sep="\t")
+            except Exception as e:
+                if attempt != 0: print("Oopsie woopsie the kagglehub module decided that it doesn't want to give me tHE PATH TO THE DATASET FOLDER IT JUST DOWNLOADED 2 SECONDS AGO 😡... so we try again calmly 😄", flush=True)
+                err = e
+        if not base_dir: raise err or Exception("Failed to download dataset from Kaggle.")
         print("Download complete!", flush=True)
+
     constants.PATH_DATA.set_base_dir(base_dir)
 
 # @st.cache_data(show_spinner="Loading DisProt and TFClasses data...")
