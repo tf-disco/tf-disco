@@ -55,6 +55,7 @@ def __initialize_dataset():
                 # try reading a file, just to test it...
                 path_data_temp = constants.PathData(base_dir)
                 pd.read_csv(path_data_temp.TFCLASSES, sep="\t")
+                break # success
             except Exception as e:
                 if attempt != 0: print("Oopsie woopsie the kagglehub module decided that it doesn't want to give me tHE PATH TO THE DATASET FOLDER IT JUST DOWNLOADED 2 SECONDS AGO 😡... so we try again calmly 😄", flush=True)
                 err = e
