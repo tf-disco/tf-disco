@@ -11,6 +11,8 @@ from base64 import b64encode
 
 from dotenv import load_dotenv
 
+from .graph import SCORE_PROPERTIES, COLOR_DISPROT, COLOR_DBD
+
 # ============================================================================ #
 
 # Don't include "Browser" suffix here
@@ -185,12 +187,12 @@ in. Optionally, the scores can also be correlated with DisProt regions, by
 showing bars under each graph to denote whether it agrees with DisProt or not.
 The scores are available for download in tabular format (CSV/TSV), which
 contains the per-residue scores for each of the metrics listed below.
-- :primary[Hydropathy Index]: Kyte-Doolittle scale with window size 11
-- :primary[AIUPred]: Disorder, Binding, Linker
-- :primary[flDPnn]: Disorder, Protein binding, DNA binding, RNA binding, Linker
-- :primary[Metapredict v3]: Disorder
-- DisProt regions
-- DBD ranges
+- :color[Hydropathy Index]{{foreground="{SCORE_PROPERTIES["HI"].color}"}}: Kyte-Doolittle scale with window size 11
+- :color[AIUPred]{{foreground="{SCORE_PROPERTIES["Aiupred-Disorder"].color}"}}: Disorder, Binding, Linker
+- :color[flDPnn]{{foreground="{SCORE_PROPERTIES["Fldpnn-Disorder"].color}"}}: Disorder, Protein binding, DNA binding, RNA binding, Linker
+- :color[Metapredict v3]{{foreground="{SCORE_PROPERTIES["Metapredict-Disorder"].color}"}}: Disorder
+- :color[DisProt]{{foreground="{COLOR_DISPROT}"}} regions
+- :color[DBD]{{foreground="{COLOR_DBD}"}} ranges
 
 The evidences of regions marked by DisProt can be viewed by the user in the
 table below the graphs. The data from this table is obtained fully from the

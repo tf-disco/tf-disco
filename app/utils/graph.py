@@ -38,7 +38,7 @@ class Score(ScoreTemplate):
 
 SCORE_PROPERTIES: dict[ScoreName, ScoreTemplate] = {
     "HI": ScoreTemplate("HI", "Hydropathy Index",
-        0.0, True, (-3.0, 3.0), "red", "rgba(255, 0, 0, 0.3)"),
+        0.0, True, (-3.0, 3.0), "slateblue", "rgba(106, 90, 238, 0.3)"),
     "Aiupred-Disorder": ScoreTemplate("Aiupred-Disorder", "AIUPred - Disorder",
         0.5, False, (0.0, 1.0), "deepskyblue", "rgba(0, 191, 255, 0.3)"),
     "Aiupred-Binding": ScoreTemplate("Aiupred-Binding", "AIUPred - Binding",
@@ -56,8 +56,10 @@ SCORE_PROPERTIES: dict[ScoreName, ScoreTemplate] = {
     "Fldpnn-Linker": ScoreTemplate("Fldpnn-Linker", "flDPnn - Linker",
         0.5, False, (0.0, 1.0), "green", "rgba(0, 128, 0, 0.3)"),
     "Metapredict-Disorder": ScoreTemplate("Metapredict-Disorder", "Metapredict v3 - Disorder",
-        0.5, False, (0.0, 1.0), "gold", "rgba(255, 215, 0, 0.3)"),
+        0.5, False, (0.0, 1.0), "orange", "rgba(255, 165, 0, 0.3)"),
 }
+COLOR_DBD = "magenta"
+COLOR_DISPROT = "red"
 
 def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | None:
     """Generate a plot-ready object for plotting the given score name, extracted
@@ -78,6 +80,8 @@ def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | No
         fillcolor=result_template.fillcolor,
     )
 
+# ============================================================================ #
+
 def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ranges: list[tuple[int, int]], disprot_regions: pd.DataFrame):
     """
     Create a Plotly Figure for plotting the given list of scores.
@@ -88,50 +92,147 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
     :param pd.DataFrame disprot_regions: df with columns: `Region_Id`, `Start`, `End`
     """
 
+    CAP_LENGTH = 0.25
+
     length = len(sequence)
     x = np.arange(1, length + 1)
 
     scores = [s for s in scores_list if s is not None]
     is_disprot_available = len(disprot_regions) > 0
 
-    # MARK: Initialize plot
+    #region Initialize plot
     fig = make_subplots(
         rows=len(scores) + (1 if is_disprot_available else 0) + (1 if dbd_ranges else 0) + 1,
         cols=1,
         shared_xaxes=True,
-        # vertical_spacing=(0.3 / len(scores)), # less spacing if no score rows
         row_heights=[
-            *([10] * len(scores)),  # weight `10` for each big graph
-            *([1] if is_disprot_available else []),  # small weight for DisProt row if it exists
-            *([1] if dbd_ranges else []),  # small weight for DBD Ranges row if it exists
+            *([10] * len(scores)), # weight `10` for each big graph
+            *([1] if is_disprot_available else []), # small weight for DisProt row if it exists
+            *([1] if dbd_ranges else []), # small weight for DBD Ranges row if it exists
             2,
         ],
         subplot_titles=[
             *[s.display_name for s in scores],
+            *(["DBD Range" + ("s" if len(dbd_ranges) > 1 else "")] if dbd_ranges else []),
             *(["DisProt"] if is_disprot_available else []),
-            *(["DBD Ranges"] if dbd_ranges else []),
             # "Sequence",
         ],
+        font=dict(size=18),
     )
 
-    # MARK: Each Disorder
+    fig.update_layout(
+        height=sum([
+            125 * len(scores),
+            50 if is_disprot_available else 0,
+            50 if dbd_ranges else 0,
+            50,
+        ]),
+        margin=dict(l=20, r=20, t=20, b=20),
+        showlegend=False,
+        hovermode="x unified",
+        legend_traceorder="normal",
+    )
+
+    fig.update_xaxes(
+        showspikes=True, spikemode="across", spikesnap="data", spikethickness=1
+    )
+
+    #endregion
+
+    #region Each Score
     for row, score in enumerate(scores, start=1):
         # Plot main line
+
+        # hover_color = score.color
+        hover_color = f"""color-mix(in srgb, currentcolor, {score.color} calc(100% * (
+            sign(sign({ f'{score.threshold} - %{{y: }}' if score.is_downward else f'%{{y: }} - {score.threshold}' }) + 0.5) / 2 + 0.5
+        )))""" # basically "score.color above threshold, default color below threshold"
+
         fig.add_trace(
             go.Scatter(
                 x=x,
-                y=score.values,
-                name=score.display_name, mode="lines", line=dict(color=score.color, width=2),
+                y=score.values, name=score.display_name,
+                mode="lines", line=dict(color=score.color, width=2),
+                hovertemplate=f"{score.display_name}: <span style='color: {hover_color}; font-family: monospace; font-weight: bold;'>%{{y:+}}</span><extra></extra>",
             ),
             row=row,
             col=1,
         )
 
+        shading_x = []
+        shading_y = []
+        idx = np.where(~np.isnan(score.values) & (score.values >= score.threshold if not score.is_downward else score.values <= score.threshold))[0] # indices where the score is not NaN
+        segments = np.split(idx, np.where(np.diff(idx) != 1)[0] + 1)
+        for seg in segments:
+            if seg.size == 0: continue
+
+            # the problem is that, around each segment, the shading cuts off
+            # abruptly. instead, it would be nice if we can have the shading
+            # extend till the score's graph intercepts the threshold line.
+
+            # to find out how far it extends, we will simply linear interpolate
+            # (since the score's graph is ... well, linear), and add that point
+            # to the list of points. you get the idea.
+            # if the score's graph doesn't intercept (maybe if we don't have a
+            # value before the start, likewise if we don't have a value after
+            # the end), then we'll just extend to `CAP_LENGTH` amount.
+
+            # naming convention for the positions:
+            # assume scores = [0.2,  0.6,  0.8, 0.9,  0.7,  0.3]
+            #                        ~~~~~~~~~~~~~~~~~~~~        = (segment to shade)
+            #                  ~~~                               = beforestart (may be NaN)
+            #                      ~                             = capstart!! to calculate
+            #                        ~~~                         = start
+            #                                         ~~~        = end
+            #                                             ~      = capend!! to calculate
+            #                                               ~~~  = afterend (may be NaN)
+            # more naming conventions:
+            #   cap = the extra shading (to be) added before the start &
+            #         after the end of the segment.
+            #   i   = 0-based index in sequence = (position - 1) = (xcoord - 1)
+
+            start_i           = int(seg[0])
+            start_value       = float(score.values[start_i])
+            beforestart_i     = start_i-1
+            beforestart_value = float(score.values[beforestart_i]) if beforestart_i >= 0 else np.nan
+            capstart_i = (
+                (start_i - CAP_LENGTH)
+                if ( np.isnan(beforestart_value) or np.sign(start_value - score.threshold) == np.sign(beforestart_value - score.threshold) )
+                # else (score.threshold - start_value) * (beforestart_i - start_i) / (beforestart_value - start_value) + start_i # simple intercept formula of a line
+                else (start_value - score.threshold) / (beforestart_value - start_value) + start_i # same as above, but simplified
+            )
+            capstart_value = np.nan_to_num(np.interp(capstart_i, np.arange(length), score.values, left=np.nan), nan=score.threshold)
+
+            end_i          = int(seg[-1])
+            end_value      = float(score.values[end_i])
+            afterend_i     = end_i + 1
+            afterend_value = float(score.values[afterend_i]) if afterend_i < length else np.nan
+            capend_i = (
+                (end_i + CAP_LENGTH)
+                if ( np.isnan(afterend_value) or np.sign(end_value - score.threshold) == np.sign(afterend_value - score.threshold) )
+                # else (score.end_value - threshold) * (afterend_i - end_i) / (afterend_value - end_value) + end_i # simple intercept formula of a line
+                else (score.threshold - end_value) / (afterend_value - end_value) + end_i # same as above, but simplified
+            )
+            capend_value = np.nan_to_num(np.interp(capend_i, np.arange(length), score.values, right=np.nan), nan=score.threshold)
+
+
+            # capstart point
+            shading_x.extend([capstart_i+1])
+            shading_y.extend([capstart_value])
+
+            # score points
+            shading_x.extend(seg+1)
+            shading_y.extend(score.values[seg])
+
+            # capend point
+            shading_x.extend([capend_i+1])
+            shading_y.extend([capend_value])
+
         # Plot area under curve
         fig.add_trace(
             go.Scatter(
-                x=x,
-                y=np.repeat(score.threshold, length),
+                x=shading_x,
+                y=np.repeat(score.threshold, len(shading_x)),
                 mode="lines", line=dict(width=0), showlegend=False, hoverinfo="skip",
             ),
             row=row,
@@ -140,10 +241,8 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
 
         fig.add_trace(
             go.Scatter(
-                x=x,
-                y=(np.clip(score.values, a_min=score.threshold, a_max=None)
-                   if not score.is_downward
-                   else np.clip(score.values, a_min=None, a_max=score.threshold)),
+                x=shading_x,
+                y=shading_y,
                 name=score.display_name,
                 mode="lines", line=dict(color=score.color, width=0), fill="tonexty", fillcolor=score.fillcolor, showlegend=False, hoverinfo="skip",
             ),
@@ -151,10 +250,10 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             col=1,
         )  # area under curve
 
-        # Configure axes
+        # Configure y-axis
         fig.update_yaxes(
             range=[score.yaxis_range[0] - 0.05, score.yaxis_range[1] + 0.05],
-            tickvals=[score.yaxis_range[0], score.threshold, score.yaxis_range[1]],  # [0, 0.2, 0.4, 0.6, 0.8, 1.0],
+            tickvals=[score.yaxis_range[0], score.threshold, score.yaxis_range[1]],
             showline=True,
             linewidth=1,
             linecolor="lightgrey",  # Draw left axis line
@@ -162,7 +261,11 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             col=1,
         )
 
-    # MARK: DBD Ranges bars
+        fig.layout.annotations[row - 1].font.color = score.color # type: ignore
+
+    #endregion
+
+    #region DBD Ranges bars
     if dbd_ranges:
         for i, (start, end) in enumerate(dbd_ranges):
             start = max(1, int(start))
@@ -175,55 +278,53 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
                 go.Scatter(
                     x=xs,
                     y=[0] * len(xs),
-                    mode="lines",
                     name="DBD Range",
-                    line=dict(color="blue", width=15),
-                    hovertemplate=f"DBD Range {i+1}<br>Start: {start}<br>End: {end}<br>Position: %{{x}}<extra></extra>",
+                    mode="lines", line=dict(color=COLOR_DBD, width=15),
+                    hovertemplate=f"DBD: {start}-{end}<extra></extra>",
                     showlegend=(i == 0),
                 ),
-                row=len(scores) + (1 if is_disprot_available else 0) + 1,
+                row=len(scores) + 1,
                 col=1,
             )
 
         fig.update_yaxes(
-            showticklabels=False,
-            showgrid=False,
-            zeroline=False,
-            title_text="DBD",
-            title_font=dict(size=12, color="grey"),
-            title_standoff=0,
-            showline=True,
-            linewidth=1,
+            showticklabels=False, showgrid=False, zeroline=False,
+            title_text="DBD", title_font=dict(size=12, color="grey"), title_standoff=0,
+            showline=True, linewidth=1,
             range=[-0.1, 0.1],
             fixedrange=True,
-            row=len(scores) + (1 if is_disprot_available else 0) + 1,
+            row=len(scores) + 1,
             col=1,
         )
 
-    # MARK: DisProt bars
+        fig.layout.annotations[len(scores) + 1 - 1].font.color = COLOR_DBD # type: ignore
+
+    #endregion
+
+    #region DisProt bars
     if is_disprot_available: # DisProt track (bottom row) + build mask for overlaps
         disprot_mask = np.zeros(length, dtype=bool)
-        for i, (region_id, start, end) in enumerate(disprot_regions[["Region_Id", "Start", "End"]].itertuples(index=False, name=None)):
-            start = max(0, int(start))
-            end = min(length - 1, int(end))
-            if end < start:
+        for i, (region_id, start_pos, end_pos) in enumerate(disprot_regions[["Region_Id", "Start", "End"]].itertuples(index=False, name=None)):
+            start_pos = max(0, int(start_pos))
+            end_pos = min(length - 1, int(end_pos))
+            if end_pos < start_pos:
                 continue
 
-            disprot_mask[start : end + 1] = True
+            disprot_mask[start_pos-1 : end_pos + 1] = True
 
-            xs = list(range(start, end + 1))
+            xs = np.arange(start_pos, end_pos + 1)
             fig.add_trace(
                 go.Scatter(
                     x=xs,
                     y=[0] * len(xs),
                     mode="lines",
                     name="DisProt",
-                    line=dict(color="purple", width=15),
+                    line=dict(color=COLOR_DISPROT, width=15),
                     # hoverinfo="skip",
-                    hovertemplate=f"{region_id}<br>Start: {start}<br>End: {end}<br>Position: %{{x}}<extra></extra>",
+                    hovertemplate=f"DisProt <span style='color: {COLOR_DISPROT}'>{region_id}</span>: {start_pos}-{end_pos}<extra></extra>",
                     showlegend=(i == 0),
                 ),
-                row=len(scores) + 1,
+                row=len(scores) + 1 + 1,
                 col=1,
             )
 
@@ -238,9 +339,11 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             linewidth=1,
             range=[-0.1, 0.1],
             fixedrange=True,
-            row=len(scores) + 1,
+            row=len(scores) + 1 + 1,
             col=1,
         )
+
+        fig.layout.annotations[len(scores) + 1 + 1 - 1].font.color = COLOR_DISPROT # type: ignore
 
         # For each score row, add "in DisProt + above threshold" highlight segments
         for row, score in enumerate(scores, start=1):
@@ -258,26 +361,34 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
                 score.yaxis_range[0] - 0.03
             )  # thin strip near the bottom of each score panel
             for seg in segments:
-                s, e = int(seg[0]), int(seg[-1])
+                s, e = int(seg[0]+1), int(seg[-1]+1) # 1-based position
+                xs = np.arange(s, e + 1)
                 fig.add_trace(
                     go.Scatter(
-                        x=[s, e],
-                        y=[highlight_y, highlight_y],
+                        x=xs,
+                        y=[highlight_y] * len(xs),
                         mode="lines",
                         line=dict(color=score.color, width=7),
                         name="",
                         showlegend=False,
                         hovertemplate=(
-                            f"{score.display_name}<br>"
-                            f"Segment: {s}-{e}<br>"
-                            f"Condition: score >= {score.threshold} and in DisProt"
+                            # f"{score.display_name}<br>"
+                            f"In range ({s}-{e}): "
+                            f"<span style='color: {score.color}'>metric</span> {'≥' if not score.is_downward else '≤'} {score.threshold} and in <span style='color: {COLOR_DISPROT}'>DisProt</span>"
+                            "<extra></extra>"
                         ),
                     ),
                     row=row,
                     col=1,
                 )
 
-    # MARK: AAs + position axis
+                # add "caps" to the left and right of the highlight segment
+                fig.add_trace(go.Scatter(x=[s-CAP_LENGTH, s], y=[highlight_y] * 2, mode="lines", line=dict(color=score.color, width=7), showlegend=False, hoverinfo="skip",), row=row, col=1)
+                fig.add_trace(go.Scatter(x=[e, e+CAP_LENGTH], y=[highlight_y] * 2, mode="lines", line=dict(color=score.color, width=7), showlegend=False, hoverinfo="skip",), row=row, col=1)
+
+    #endregion
+
+    #region AAs + position axis
     fig.add_trace(
         go.Scatter(
             x=np.arange(1, length + 1),
@@ -315,21 +426,6 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         col=1,
     )
 
-    # MARK: Overall config
-    fig.update_layout(
-        height=sum([
-            125 * len(scores),
-            50 if is_disprot_available else 0,
-            50 if dbd_ranges else 0,
-            50,
-        ]),
-        margin=dict(l=40, r=20, t=20, b=20),
-        showlegend=False,
-        hovermode="x unified",
-        legend_traceorder="normal",
-    )
+    #endregion
 
-    fig.update_xaxes(
-        showspikes=True, spikemode="across", spikesnap="cursor", spikethickness=1
-    )
     return fig

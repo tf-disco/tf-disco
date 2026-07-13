@@ -191,7 +191,7 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
     score_names_selected = st.pills(
         label="Select scores to display:",
         options=score_names_all,
-        format_func=lambda score_name: graph.SCORE_PROPERTIES[score_name].display_name,
+        format_func=lambda score_name: f':color[:material/show_chart:]{{foreground="{graph.SCORE_PROPERTIES[score_name].color}"}} {graph.SCORE_PROPERTIES[score_name].display_name}',
         default=st.session_state.get("scores_to_display", score_names_default),
         selection_mode="multi",
         key="scoresToDisplay",
@@ -267,10 +267,10 @@ with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected
             "Start": (tf_matches["Start"].astype(str)),
             "End": (tf_matches["End"].astype(str)),
             **{
-                graph.SCORE_PROPERTIES[name].display_name: (tf_matches[name].astype(str))
+                f':color[{graph.SCORE_PROPERTIES[name].display_name}]{{foreground="{graph.SCORE_PROPERTIES[name].color}"}}': (tf_matches[name].astype(str))
                 for name in cast(list[graph.ScoreName], ["Aiupred-Disorder", "Fldpnn-Disorder", "Metapredict-Disorder"])
             },
-            "Domain": (tf_matches["Domain"].astype(str)),
+            f':color[Domain]{{foreground="{graph.COLOR_DBD}"}}': (tf_matches["Domain"].astype(str)),
         }, axis=1),
         hide_index=True,
         height=500 if len(tf_matches) > 5 else "content",
