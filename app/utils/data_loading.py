@@ -142,7 +142,7 @@ def __load_fasta() -> dict[str, TFInfo]:
         records = list(FastaIterator(handle))
 
     for record in records:
-        genus_num, uniprot_acc, genus_name = str(record.description + "__").split("_", maxsplit=3)[:3]
+        genus_num, uniprot_acc, genus_name = [*str(record.description).split("_", maxsplit=2),"",""][:3]
         sequence_dict[genus_num] = TFInfo(
             Uniprot_Acc=uniprot_acc,
             Genus_Name=genus_name,
