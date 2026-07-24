@@ -99,16 +99,16 @@ To use either of these images, follow the below instructions:
         docker run -it -p 8501:8501 joejojoestar/tf-disco-autoupdate:latest
         ```
 
-    > [!TIP]
-    > To keep TF-DISCO up-to-date, it is recommended to simply restart the
-    > container periodically, and it'll fetch the latest changes in the main
-    > repository. This works only with `tf-disco-autoupdate`.
-    >
-    > ```bash
-    > docker container ls --format="table {{.ID}}\t{{.Image}}" # to get the container ID
-    > docker restart CONTAINER_ID
-    > ```
-    > ![Docker restart](./assets/readme/docker_restart.png)
+> [!TIP]
+> To keep TF-DISCO up-to-date, it is recommended to simply restart the
+> container periodically, and it'll fetch the latest changes in the main
+> repository. This works only with `tf-disco-autoupdate`.
+>
+> ```bash
+> docker container ls --format="table {{.ID}}\t{{.Image}}" # to get the container ID
+> docker restart CONTAINER_ID
+> ```
+> ![Docker restart](./assets/readme/docker_restart.png)
 
 <details>
 <summary><b>Building the Image with a Custom Dataset</b></summary>
