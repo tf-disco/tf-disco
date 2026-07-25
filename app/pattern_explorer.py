@@ -1,5 +1,5 @@
 from math import ceil
-from typing import Final
+from typing import cast, Final
 
 import streamlit as st
 import pandas as pd
@@ -160,7 +160,7 @@ with st.expander(f"Select Patterns", icon=":material/view_timeline:", expanded=T
         )
         patterns__sel_row_nums = helper.get_df_selected_rows(patterns__state)
         patterns__sel_row = patterns_df.iloc[patterns__sel_row_nums[0]] if len(patterns__sel_row_nums) == 1 else None
-        patterns__sel_elm_acc = patterns__sel_row["ELM_Acc"] if patterns__sel_row is not None else None
+        patterns__sel_elm_acc = cast(str, patterns__sel_row["ELM_Acc"]) if patterns__sel_row is not None else None
 
     if patterns__sel_elm_acc:
         st.query_params["elm_acc"] = patterns__sel_elm_acc
@@ -171,7 +171,7 @@ with st.expander(f"Select Patterns", icon=":material/view_timeline:", expanded=T
 
 st.divider()
 
-if patterns__sel_row is None:
+if patterns__sel_row is None or patterns__sel_elm_acc is None:
     st.warning("No pattern selected. Please select a pattern from the table above to see details here.")
 
     st.divider()
@@ -182,25 +182,25 @@ else:
     st.header(":material/regular_expression: Selected pattern", anchor=False)
 
     #region Selected pattern: Overview
-    selected_pattern_matches_df: pd.DataFrame = matches_df[matches_df["ELM_Acc"] == patterns__sel_elm_acc]
+    selected_pattern_matches_df = matches_df[matches_df["ELM_Acc"] == patterns__sel_elm_acc]
     selected_pattern_df = (selected_pattern_matches_df
                                     .groupby(COLUMNS)
                                     .size()
                                     .sort_values(ascending=False)
                                     .reset_index(name="Observed"))
-    patterns__sel_pattern = selected_pattern_df["Regex"].values[0]
+    patterns__sel_pattern: str = selected_pattern_df["Regex"][0]
     total_observed_counts = selected_pattern_df["Observed"].sum()
     if filt_to_cart:
         selected_pattern_matches_df = selected_pattern_matches_df[selected_pattern_matches_df["Genus_Num"].isin(cart)]
-        selected_pattern_df = selected_pattern_df[selected_pattern_df["Genus_Num"].isin(cart)]
+        selected_pattern_df = selected_pattern_df[selected_pattern_df["Genus_Num"].isin(cart)].reset_index(drop=True)
 
     with st.sidebar:
         sidebar.render_pattern_summary(patterns__sel_row, in_cart=filt_to_cart, show_count_of_tfs=True)
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("ELM Accession", f"[{selected_pattern_df['ELM_Acc'].values[0]}](http://elm.eu.org/{selected_pattern_df['ELM_Acc'].values[0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern accession number, which uniquely identifies the pattern in the ELM database.")
-    col2.metric("ELM ID", f"[{selected_pattern_df['ELM_Id'].values[0]}](http://elm.eu.org/elms/{selected_pattern_df['ELM_Id'].values[0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern ID, which uniquely identifies the pattern in the ELM database.")
+    col1.metric("ELM Accession", f"[{selected_pattern_df['ELM_Acc'][0]}](http://elm.eu.org/{selected_pattern_df['ELM_Acc'][0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern accession number, which uniquely identifies the pattern in the ELM database.")
+    col2.metric("ELM ID", f"[{selected_pattern_df['ELM_Id'][0]}](http://elm.eu.org/elms/{selected_pattern_df['ELM_Id'][0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern ID, which uniquely identifies the pattern in the ELM database.")
     col3.metric("Observed Matches" + (" (in cart)" if filt_to_cart else ""), selected_pattern_df["Observed"].sum(), border=True, help="The number of matches of the pattern across all species.")
 
     @st.fragment(parallel=True)
