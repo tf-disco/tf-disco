@@ -8,6 +8,7 @@ if __name__ == "__main__":
 from pathlib import Path
 from os import getenv
 from base64 import b64encode
+from typing import Final
 
 from dotenv import load_dotenv
 
@@ -16,10 +17,10 @@ from .graph import SCORE_PROPERTIES, COLOR_DISPROT, COLOR_DBD
 # ============================================================================ #
 
 # Don't include "Browser" suffix here
-APP_NAME = "TF-DISCO"
+APP_NAME: Final = "TF-DISCO"
 """The name of the application, used for page titles and other places."""
 
-PATH_ROOT = Path(__file__).parents[2]
+PATH_ROOT: Final = Path(__file__).parents[2]
 """Path to the root of project."""
 
 def GET_APP_COMMIT_HASH() -> str:
@@ -36,44 +37,44 @@ def GET_APP_COMMIT_HASH() -> str:
 if getenv("IS_DOCKER", "0") == "0":
     load_dotenv(PATH_ROOT / ".env")
 
-__DATASET_PATH_OVERRIDE = getenv("DATASET_PATH_OVERRIDE")
-ENV_DATASET_PATH_OVERRIDE = (PATH_ROOT / __DATASET_PATH_OVERRIDE).resolve() if __DATASET_PATH_OVERRIDE else None
+__DATASET_PATH_OVERRIDE: Final = getenv("DATASET_PATH_OVERRIDE")
+ENV_DATASET_PATH_OVERRIDE: Final = (PATH_ROOT / __DATASET_PATH_OVERRIDE).resolve() if __DATASET_PATH_OVERRIDE else None
 
-__MUSCLE_PATH = getenv("MUSCLE_PATH")
-ENV_MUSCLE_PATH = (PATH_ROOT / __MUSCLE_PATH).resolve() if __MUSCLE_PATH else None
+__MUSCLE_PATH: Final = getenv("MUSCLE_PATH")
+ENV_MUSCLE_PATH: Final = (PATH_ROOT / __MUSCLE_PATH).resolve() if __MUSCLE_PATH else None
 
 #endregion
 
 
 #region Page paths
-PATH_ASSET_LOGO = PATH_ROOT / "assets/logo.png"
+PATH_ASSET_LOGO: Final = PATH_ROOT / "assets/logo.png"
 """Path to the logo, 534x534."""
 
-ASSET_LOGO_DATAURI = f"data:image/png;base64,{b64encode(PATH_ASSET_LOGO.read_bytes()).decode('utf-8')}"
+ASSET_LOGO_DATAURI: Final = f"data:image/png;base64,{b64encode(PATH_ASSET_LOGO.read_bytes()).decode('utf-8')}"
 """Data URI for the logo, used for embedding the logo in markdown."""
 
-PATH_PAGE_HOME = PATH_ROOT / "app/home.py"
+PATH_PAGE_HOME: Final = PATH_ROOT / "app/home.py"
 """Path to the **Home** page."""
 
-PATH_PAGE_TF_BROWSER = PATH_ROOT / "app/tf_browser.py"
+PATH_PAGE_TF_BROWSER: Final = PATH_ROOT / "app/tf_browser.py"
 """Path to the **TF Browser** page."""
 
-PATH_PAGE_TF_VIEW = PATH_ROOT / "app/tf_view.py"
+PATH_PAGE_TF_VIEW: Final = PATH_ROOT / "app/tf_view.py"
 """Path to the **TF Viewer** page."""
 
-PATH_PAGE_PATTERN_EXPLORER = PATH_ROOT / "app/pattern_explorer.py"
+PATH_PAGE_PATTERN_EXPLORER: Final = PATH_ROOT / "app/pattern_explorer.py"
 """Path to the **Pattern Explorer** page."""
 
-PATH_PAGE_ABOUT = PATH_ROOT / "app/about.py"
+PATH_PAGE_ABOUT: Final = PATH_ROOT / "app/about.py"
 """Path to the **About** page."""
 
-PATH_PAGE_HELP = PATH_ROOT / "app/about_help.py"
+PATH_PAGE_HELP: Final = PATH_ROOT / "app/about_help.py"
 """Path to the **Help** page."""
 
 #endregion
 
 #region Dataset
-KAGGLE_HANDLE = "joejojoestar/tf-disco-datasets/versions/3"
+KAGGLE_HANDLE: Final = "joejojoestar/tf-disco-datasets/versions/3"
 """The Kaggle handle for the datasets."""
 
 class PathData:
@@ -112,12 +113,12 @@ class PathData:
         self.TF_PATTERNS = base_dir / "patterns.tsv"
         self.TF_MATCHES = base_dir / "matches.tsv"
 
-PATH_DATA = PathData(ENV_DATASET_PATH_OVERRIDE or Path("./data/")) # initial value
+PATH_DATA: Final = PathData(ENV_DATASET_PATH_OVERRIDE or Path("./data/")) # initial value
 
 #endregion
 
 #region Content
-CONTENT_SUMMARY = f"""
+CONTENT_SUMMARY: Final = f"""
 {APP_NAME} (:primary[T]ranscription :primary[F]actor identity,
 :primary[DIS]order, :primary[CO]ntext/motifs) is an integrated database and
 visualization platform for transcription factors (TFs). It combines curated
@@ -134,7 +135,7 @@ investigate relationships between motif occurrence and intrinsic disorder.
 
 
 
-CONTENT_CONTACT = f"""
+CONTENT_CONTACT: Final = f"""
 For inquiries, feedback, or contributions, please reach out to us at
 [debostuti@dubai.bits-pilani.ac.in](mailto:debostuti@dubai.bits-pilani.ac.in)
 or make an [issue on GitHub](https://github.com/tf-disco/tf-disco/issues).
@@ -143,7 +144,7 @@ We welcome your input and look forward to hearing from you!
 
 
 
-CONTENT_HELP_TF_BROWSER = f"""
+CONTENT_HELP_TF_BROWSER: Final = f"""
 The user can use the :primary[:material/view_list: TF Browser] page to discover
 and search amongst all the TFs available, which are :primary[listed in the
 table].
@@ -168,7 +169,7 @@ following can be done:
 
 
 
-CONTENT_HELP_TF_VIEWER = f"""
+CONTENT_HELP_TF_VIEWER: Final = f"""
 This page shows the information of the selected TF. Basic info such as
 UniProt accession number, DisProt ID (if exists), length of sequence, and the
 ranges of positions marked as DNA Binding Domains (DBD) is shown.
@@ -237,7 +238,7 @@ each TF, which is also available for download in tabular (CSV/TSV) format.
 
 
 
-CONTENT_DEVS = """
+CONTENT_DEVS: Final = """
 Website developed by:
 - Joseph Cijo ([GitHub](https://github.com/joejo-joestar), [LinkedIn](https://linkedin.com/in/joseph-cijo), [:material/mail:](mailto:joecn2704+tfdisco@gmail.com))
 - Sreenikethan Iyer ([GitHub](http://github.com/SreenikethanI), [LinkedIn](https://linkedin.com/in/sreenikethan-i), [:material/mail:](mailto:sreeni.s.iyer+tfdisco@gmail.com))

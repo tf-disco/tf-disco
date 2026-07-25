@@ -1,4 +1,5 @@
 from math import ceil
+from typing import Final
 
 import streamlit as st
 import pandas as pd
@@ -28,7 +29,7 @@ st.caption("Explore and analyze patterns occurring in Transcription Factors", te
 with st.sidebar:
     st.empty()
 
-COLUMNS = ["Genus_Num", "Uniprot_Acc", "Genus_Name", "ELM_Acc", "ELM_Id", "Regex"]
+COLUMNS: Final = ["Genus_Num", "Uniprot_Acc", "Genus_Name", "ELM_Acc", "ELM_Id", "Regex"]
 
 #endregion
 

@@ -11,6 +11,7 @@ from math import floor, ceil
 from collections import Counter
 from tempfile import NamedTemporaryFile
 from pathlib import Path
+from typing import Final
 
 import streamlit as st
 import pandas as pd
@@ -23,8 +24,8 @@ from . import constants
 # ============================================================================ #
 
 #region Muscle
-# URL = "https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.gz"
-URL = "https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
+# URL: Final = "https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.gz"
+URL: Final = "https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
 
 def get_muscle_path() -> Path:
     try:
@@ -59,7 +60,7 @@ def run_muscle_alignment(sequences: list[str]):
 
     :param sequences: A list of sequences to align.
     """
-    PRINT_ON_ERROR = False
+    PRINT_ON_ERROR: Final = False
 
     # create temporary files for MUSCLE input and output
     file_muscle_in = NamedTemporaryFile("w+", delete=False, delete_on_close=False, suffix=".fasta", encoding="utf-8")
@@ -114,8 +115,8 @@ def run_muscle_alignment(sequences: list[str]):
 
 #region Logo - PIL
 # Hydrophobicity color scheme
-AMINO_ACIDS = set("ARNDCQEGHILKMFPSTWYV")
-COLOR_SCHEME: dict[str, str] = {
+AMINO_ACIDS: Final = set("ARNDCQEGHILKMFPSTWYV")
+COLOR_SCHEME: Final[dict[str, str]] = {
     **{ch: "#0000ff" for ch in "RKDENQ"},
     **{ch: "#007f00" for ch in "SGHTAP"},
     **{ch: "#000000" for ch in "YVMCLFIW"},

@@ -6,7 +6,7 @@ if __name__ == "__main__":
     exit()
 
 from random import randint
-from typing import Literal
+from typing import Literal, Final
 from collections import OrderedDict
 import re
 
@@ -78,7 +78,7 @@ def parse_dbd_ranges(dbd_range_str: str) -> list[tuple[int, int]]:
 #region Render
 FilterBy = Literal["Superclass", "Class", "Family", "Subfamily", "Name"]
 # dict mapping `option` to its display name
-FILTER_OPTIONS: OrderedDict[FilterBy, str] = OrderedDict([
+FILTER_OPTIONS: Final[OrderedDict[FilterBy, str]] = OrderedDict([
     ("Superclass", "Superclass"),
     ("Class", "Class"),
     ("Family", "Family"),

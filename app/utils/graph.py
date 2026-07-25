@@ -6,7 +6,7 @@ if __name__ == "__main__":
     exit()
 
 from dataclasses import dataclass
-from typing import NamedTuple, Any, Literal
+from typing import Final, Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -36,7 +36,7 @@ class ScoreTemplate():
 class Score(ScoreTemplate):
     values: np.typing.NDArray[Any]
 
-SCORE_PROPERTIES: dict[ScoreName, ScoreTemplate] = {
+SCORE_PROPERTIES: Final[dict[ScoreName, ScoreTemplate]] = {
     "HI": ScoreTemplate("HI", "Hydropathy Index",
         0.0, True, (-3.0, 3.0), "slateblue", "rgba(106, 90, 238, 0.3)"),
     "Aiupred-Disorder": ScoreTemplate("Aiupred-Disorder", "AIUPred - Disorder",
@@ -58,8 +58,8 @@ SCORE_PROPERTIES: dict[ScoreName, ScoreTemplate] = {
     "Metapredict-Disorder": ScoreTemplate("Metapredict-Disorder", "Metapredict v3 - Disorder",
         0.5, False, (0.0, 1.0), "orange", "rgba(255, 165, 0, 0.3)"),
 }
-COLOR_DBD = "magenta"
-COLOR_DISPROT = "red"
+COLOR_DBD: Final = "magenta"
+COLOR_DISPROT: Final = "red"
 
 def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | None:
     """Generate a plot-ready object for plotting the given score name, extracted
@@ -93,7 +93,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
     :param bool compare_with_disprot: whether to render DisProt compare bars below each graph
     """
 
-    CAP_LENGTH = 0.25
+    CAP_LENGTH: Final = 0.25
 
     length = len(sequence)
     x = np.arange(1, length + 1)

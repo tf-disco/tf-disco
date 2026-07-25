@@ -12,7 +12,7 @@ Script authors:
 import math
 from dataclasses import dataclass
 from collections import Counter
-from typing import Callable, Literal, cast
+from typing import Callable, Literal, cast, Final
 
 import pandas as pd
 import numpy as np
@@ -22,7 +22,7 @@ from .data_loading import TFInfo
 
 
 #region Constants
-AA_COUNT = 20
+AA_COUNT: Final = 20
 AminoAcid = Literal["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 #endregion
 

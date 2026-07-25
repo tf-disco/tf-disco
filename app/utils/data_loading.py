@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Final
 
 import streamlit as st
 import pandas as pd
@@ -23,7 +23,7 @@ from . import helper
 
 # ============================================================================ #
 
-# DISORDER_COLS_DONT_REPLACE_X = {
+# DISORDER_COLS_DONT_REPLACE_X: Final = {
 #     "Position", "Residue", "DbdFlag",
 #     "Disprot", "DisprotRegionIds",
 #     "AiupredAgreesWithDisprot", "HICorrelatesWithDisprot",
