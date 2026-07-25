@@ -4,7 +4,6 @@ from app.utils import constants
 
 
 #region Config
-LOGO_IMAGE = "assets/logo.png"
 st.set_page_config(
     page_title=constants.APP_NAME,
     initial_sidebar_state="collapsed",
@@ -58,7 +57,12 @@ with st.container(width="stretch", horizontal=True, horizontal_alignment="distri
 
 with st.container(width="stretch", horizontal=False):
     st.write("Or, try out an example:")
-    examples = ["3.7.1.6.2", "4.1.6.1.1", "2.1.2.4.3"]
+    examples = [
+        "3.7.1.6.2", # most DisProt segments (10)
+        "1.2.6.8.1", # Most DPR segments (35)
+        "4.1.6.1.1", # most DBD segments (6)
+        "2.1.2.4.3",
+    ]
     for genus_num in examples:
         st.page_link(
             constants.PATH_PAGE_TF_VIEW,

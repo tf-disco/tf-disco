@@ -57,7 +57,7 @@ def render_pattern_summary(pattern_row: pd.Series, in_cart: bool=False, show_cou
     :param pattern_row: Expected columns: `pattern_row`: `Regex`, `Expected`,
         `Observed`, `ZScore`, `Log2FC`."""
 
-    st.header(f":material/pattern: Selected pattern details")
+    st.header(f":material/select_check_box: Selected pattern details")
     st.table(
         data={
             ":material/link: ELM Accession": f"[{pattern_row["ELM_Acc"]}](http://elm.eu.org/elms/{pattern_row["ELM_Acc"]})",
@@ -84,7 +84,7 @@ def render_pattern_selector(matches: pd.DataFrame, selected_genus_num: str) -> t
     """
 
     st.header(":material/view_timeline: ELM patterns")
-    st.write("Select a pattern from the table below to highlight its matches in the TF's sequence. Scroll down to see more details about the pattern.")
+    st.write(f"Select a pattern from the table below to :color[**highlight**]{{foreground={helper.COLOR_MATCH_1_FG} background={helper.COLOR_MATCH_1_BG}}} its matches in the TF's sequence. Scroll down to see more details about the pattern.")
 
     max_penalty_at_20 = helper.render_vagueness_penalty_slider()
     vagueness_penalty_func = patterns.make_vagueness_penalty_func(max_penalty_at_20)

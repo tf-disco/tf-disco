@@ -12,6 +12,7 @@ from typing import Final
 
 from dotenv import load_dotenv
 
+from .helper import COLOR_MATCH_1_FG, COLOR_MATCH_1_BG
 from .graph import SCORE_PROPERTIES, COLOR_DISPROT, COLOR_DPR, COLOR_DBD
 
 # ============================================================================ #
@@ -207,8 +208,8 @@ DisProt database.
 
 On the left sidebar, a table displays the ELM patterns that have matches
 occurring in the currently selected TF. Click on the
-:primary[:material/check_box:] checkbox next to a pattern to highlight its
-matches in the sequence.
+:primary[:material/check_box:] checkbox next to a pattern to :color[**highlight**]{{foreground={COLOR_MATCH_1_FG} background={COLOR_MATCH_1_BG}}}
+its matches in the sequence.
 """
 
 
