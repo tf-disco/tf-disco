@@ -52,7 +52,7 @@ def get_muscle_path() -> Path:
     st.session_state.muscle_path = muscle_path
     return muscle_path
 
-@st.cache_data(show_spinner=False, persist="disk")
+@st.cache_data(show_spinner=False)
 def run_muscle_alignment(sequences: list[str]):
     """
     Run MUSCLE alignment on the input FASTA file, and save the aligned sequences
