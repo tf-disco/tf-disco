@@ -328,13 +328,13 @@ else:
             st.download_button(
                 label=":material/download: TSV",
                 data=selected_pattern_df.to_csv(index=False, sep="\t").encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_frequency.tsv",
+                file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} frequency.tsv",
                 mime="text/tab-separated-values",
             )
             st.download_button(
                 label=":material/download: CSV",
                 data=selected_pattern_df.to_csv(index=False).encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_frequency.csv",
+                file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} frequency.csv",
                 mime="text/csv",
             )
 

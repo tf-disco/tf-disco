@@ -124,7 +124,7 @@ with st.container(horizontal=True, vertical_alignment="center", horizontal_align
     st.download_button(
         label=":material/download: FASTA",
         data=sequence_fasta,
-        file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
+        file_name=f"{constants.APP_NAME} - TF {tf_genus_num}_{tf_uniprot}_{tf_genus_name}.fasta",
         mime="text/plain",
     )
 st.code(sequence_fasta, language="plaintext", line_numbers=False, wrap_lines=False)
@@ -163,13 +163,13 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
         st.download_button(
             label=":material/download: TSV",
             data=tf_disorder_scores.to_csv(index=False, sep="\t").encode("utf-8"),
-            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.tsv",
+            file_name=f"{constants.APP_NAME} - TF {tf_genus_num}_{tf_uniprot}_{tf_genus_name} scores.tsv",
             mime="text/tab-separated-values",
         )
         st.download_button(
             label=":material/download: CSV",
             data=tf_disorder_scores.to_csv(index=False).encode("utf-8"),
-            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}.csv",
+            file_name=f"{constants.APP_NAME} - TF {tf_genus_num}_{tf_uniprot}_{tf_genus_name} scores.csv",
             mime="text/csv",
         )
 
@@ -240,13 +240,13 @@ with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected
         st.download_button(
             label=":material/download: TSV",
             data=tf_matches.to_csv(index=False, sep="\t").encode("utf-8"),
-            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.tsv",
+            file_name=f"{constants.APP_NAME} - TF {tf_genus_num}_{tf_uniprot}_{tf_genus_name} matches.tsv",
             mime="text/tab-separated-values",
         )
         st.download_button(
             label=":material/download: CSV",
             data=tf_matches.to_csv(index=False).encode("utf-8-sig"),
-            file_name=f"{tf_genus_num}_{tf_uniprot}_{tf_genus_name}_matches.csv",
+            file_name=f"{constants.APP_NAME} - TF {tf_genus_num}_{tf_uniprot}_{tf_genus_name} matches.csv",
             mime="text/csv",
         )
 
