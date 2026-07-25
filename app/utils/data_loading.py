@@ -68,13 +68,18 @@ def __initialize_dataset():
 def __load_disprot_tfclasses_dfs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, str]]:
     """Loads and returns:
     1. DisProt DataFrame
-    2. TFClasses DataFrame
-    3. A mapping from Genus number to Genus name (e.g. `"2.1.1.1.1"` -> `"Glucocorticoid receptor (GR) (NR3C1)"`)
+    2. TFClasses DataFrame, with extra columns:
+        - `Name` (display name)
+        - `Disprot_Perc` (percentage of residues in DisProt regions)
+        - `DBD`
+        - `DPR`
+    3. A dict mapping from Genus number to `Name` (display name) (e.g. `"2.1.2.4.3"` -> `"CAR (NR1I3)"`)
     """
 
     tfclasses_df = pd.read_csv(constants.PATH_DATA.TFCLASSES, sep="\t")
     disprot_df = pd.read_csv(constants.PATH_DATA.DISPROT, sep="\t")
-    dbd_ranges_df = pd.read_csv(constants.PATH_DATA.TF_DBD_RANGES, sep="\t")
+    dbd_df = pd.read_csv(constants.PATH_DATA.TF_DBD, sep="\t")
+    dpr_df = pd.read_csv(constants.PATH_DATA.TF_DPR, sep="\t")
 
     disprot_df = disprot_df.sort_values(by=["Uniprot_Acc", "Start", "End"], ascending=True).reset_index(drop=True)
 
@@ -82,23 +87,17 @@ def __load_disprot_tfclasses_dfs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str
     # 1. sort on genus number
     tfclasses_df["Genus_Num_Parts"] = tfclasses_df["Genus_Num"].str.split(".").map(lambda parts: [int(part) for part in parts]) # type:ignore
     tfclasses_df = tfclasses_df.sort_values(by="Genus_Num_Parts")
+    tfclasses_df[["Superclass", "Class", "Family", "Subfamily"]] = tfclasses_df[["Superclass", "Class", "Family", "Subfamily"]].astype(str).fillna("")
 
-    # 2. create columns superclass, class, family, subfamily, genus:
-    tfclasses_df["Superclass"] = tfclasses_df["Genus_Num_Parts"].map(lambda parts: ".".join(str(part) for part in parts[:1])) # type: ignore
-    tfclasses_df["Class"] = tfclasses_df["Genus_Num_Parts"].map(lambda parts: ".".join(str(part) for part in parts[:2])) # type: ignore
-    tfclasses_df["Family"] = tfclasses_df["Genus_Num_Parts"].map(lambda parts: ".".join(str(part) for part in parts[:3])) # type: ignore
-    tfclasses_df["Subfamily"] = tfclasses_df["Genus_Num_Parts"].map(lambda parts: ".".join(str(part) for part in parts[:4])) # type: ignore
-    tfclasses_df = tfclasses_df.drop("Genus_Num_Parts", axis=1)
-
-    # 3. create title column
+    # 2. create title column
     tfclasses_df["Name"] = tfclasses_df[["Uniprot_Acc", "Genus_Num", "Genus_Name"]].apply(
         lambda row: f"{row['Uniprot_Acc']} | {row['Genus_Num']} | {row['Genus_Name']}",
         axis=1
     )
 
-    # 4. create new column "Disprot_Available"
+    # 3. create new column "Disprot_Available"
     # tfclasses_df["Disprot_Available"] = tfclasses_df["Uniprot_Acc"].isin(disprot_df["Uniprot_Acc"]).map({True: "✅", False: "❌"})
-    # 4. create new column "Disprot_Perc"
+    # 3. create new column "Disprot_Perc"
     tfclasses_df = tfclasses_df.merge(
         (disprot_df[["Uniprot_Acc", "Start", "End"]]
             .groupby("Uniprot_Acc")
@@ -109,13 +108,21 @@ def __load_disprot_tfclasses_dfs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str
         on="Uniprot_Acc",
     )
 
-    # 5. merge DBD ranges into tfclasses_df
+    # 4. merge DBD into tfclasses_df
     tfclasses_df = tfclasses_df.merge(
-        dbd_ranges_df[["Genus_Num", "Dbd_Range"]],
+        dbd_df[["Genus_Num", "DBD"]],
         how="left",
         on="Genus_Num",
     )
-    tfclasses_df["Dbd_Range"] = tfclasses_df["Dbd_Range"].fillna("")
+    tfclasses_df["DBD"] = tfclasses_df["DBD"].fillna("")
+
+    # 5. merge DPR into tfclasses_df
+    tfclasses_df = tfclasses_df.merge(
+        dpr_df[["Genus_Num", "DPR"]],
+        how="left",
+        on="Genus_Num",
+    )
+    tfclasses_df["DPR"] = tfclasses_df["DPR"].fillna("")
 
     tfclasses_df = tfclasses_df.reset_index(drop=True)
 
@@ -181,10 +188,10 @@ def __load_df(paths: list[Path], genus_num: str) -> pd.DataFrame:
 #region Public functions
 @st.cache_data(show_spinner="Loading Disorder scores...")
 def load_disorder_scores(genus_num: str) -> pd.DataFrame:
-    """Load the disorder scores for the given genus number.
+    """Load the disorder scores for the given genus number."""
 
-    Columns (except the ones listed in `COLS_DONT_REPLACE_X`) are coerced to
-    numeric datatype. Non-numeric values (e.g. `X`) are replaced with `nan`."""
+    # Columns (except the ones listed in `COLS_DONT_REPLACE_X`) are coerced to
+    # numeric datatype. Non-numeric values (e.g. `X`) are replaced with `nan`."""
 
     df = __load_df(__load_paths_disorder(), genus_num)
     # metric_cols = list( set(df.columns) - DISORDER_COLS_DONT_REPLACE_X )

@@ -12,7 +12,7 @@ from typing import Final
 
 from dotenv import load_dotenv
 
-from .graph import SCORE_PROPERTIES, COLOR_DISPROT, COLOR_DBD
+from .graph import SCORE_PROPERTIES, COLOR_DISPROT, COLOR_DPR, COLOR_DBD
 
 # ============================================================================ #
 
@@ -74,7 +74,7 @@ PATH_PAGE_HELP: Final = PATH_ROOT / "app/about_help.py"
 #endregion
 
 #region Dataset
-KAGGLE_HANDLE: Final = "joejojoestar/tf-disco-datasets/versions/3"
+KAGGLE_HANDLE: Final = "joejojoestar/tf-disco-datasets/versions/4"
 """The Kaggle handle for the datasets."""
 
 class PathData:
@@ -84,8 +84,11 @@ class PathData:
     TFCLASSES: Path
     """Path to the TFClasses dataset."""
 
-    TF_DBD_RANGES: Path
+    TF_DBD: Path
     """Path to the TSV file containing DBD regions for each TF."""
+
+    TF_DPR: Path
+    """Path to the TSV file containing DPR regions for each TF."""
 
     TF_FASTA: Path
     """Path to the FASTA file containing all TF sequences."""
@@ -107,7 +110,8 @@ class PathData:
         """Re-initialize paths to Data files, with the provided base directory."""
         self.DISPROT = base_dir / "disprot_data.tsv"
         self.TFCLASSES = base_dir / "tfclasses.tsv"
-        self.TF_DBD_RANGES = base_dir / "dbd_ranges.tsv"
+        self.TF_DBD = base_dir / "dna_binding_domains.tsv"
+        self.TF_DPR = base_dir / "droplet_promoting_regions.tsv"
         self.TF_FASTA = base_dir / "tfs_fasta/tfs_all.fasta"
         self.TFS_DISORDER = base_dir / "tfs_metrics/"
         self.TF_PATTERNS = base_dir / "patterns.tsv"
@@ -175,12 +179,13 @@ UniProt accession number, DisProt ID (if exists), length of sequence, and the
 ranges of positions marked as DNA Binding Domains (DBD) is shown.
 
 The sequence is rendered 10-residue-long blocks. The sequence can be downloaded
-in the FASTA format, if desired. There are two annotations which can be enabled
-on the sequence:
-1. DBD regions, denoted by a **Black/White** overline above the residues which
-   are part of the DNA Binding Domains
-2. Disorder predictors, denoted by a :red[Red] underline on residues which are
-   predicted to be disordered. More on this below.
+in the FASTA format, if desired. There are two types of annotations which can be
+enabled on the sequence:
+1. **Overline** above the residues. The user may choose either to show the DNA
+   Binding Domains or the Droplet-Promoting Regions to be marked.
+2. **Underline** below the residues. The user may choose a Disorder predictor to
+   be marked. More on this below.
+3. **Highlight** on the residue. More on this below.
 
 The Score Plots section displays a graph/plot of the metrics listed below. The
 graph is interactive, and the user can make a selection with the mouse to zoom
@@ -192,8 +197,9 @@ contains the per-residue scores for each of the metrics listed below.
 - :color[AIUPred]{{foreground="{SCORE_PROPERTIES["Aiupred-Disorder"].color}"}}: Disorder, Binding, Linker
 - :color[flDPnn]{{foreground="{SCORE_PROPERTIES["Fldpnn-Disorder"].color}"}}: Disorder, Protein binding, DNA binding, RNA binding, Linker
 - :color[Metapredict v3]{{foreground="{SCORE_PROPERTIES["Metapredict-Disorder"].color}"}}: Disorder
-- :color[DisProt]{{foreground="{COLOR_DISPROT}"}} regions
-- :color[DBD]{{foreground="{COLOR_DBD}"}} ranges
+- :color[DisProt]{{foreground="{COLOR_DISPROT}"}} regions: The DisProt regions as annotated in the DisProt database
+- :color[DPR]{{foreground="{COLOR_DPR}"}}: The Droplet Promoting Regions (DPR) predicted using the FuzDrop tool
+- :color[DBD]{{foreground="{COLOR_DBD}"}}: The DNA Binding Domains (DBD) as annotated in the UniProt database
 
 The evidences of regions marked by DisProt can be viewed by the user in the
 table below the graphs. The data from this table is obtained fully from the

@@ -58,8 +58,9 @@ SCORE_PROPERTIES: Final[dict[ScoreName, ScoreTemplate]] = {
     "Metapredict-Disorder": ScoreTemplate("Metapredict-Disorder", "Metapredict v3 - Disorder",
         0.5, False, (0.0, 1.0), "orange", "rgba(255, 165, 0, 0.3)"),
 }
-COLOR_DBD: Final = "magenta"
 COLOR_DISPROT: Final = "red"
+COLOR_DPR: Final = "#76777F"
+COLOR_DBD: Final = "magenta"
 
 def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | None:
     """Generate a plot-ready object for plotting the given score name, extracted
@@ -82,15 +83,21 @@ def make_score_renderable(score_name: ScoreName, df: pd.DataFrame) -> Score | No
 
 # ============================================================================ #
 
-def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ranges: list[tuple[int, int]], disprot_regions: pd.DataFrame, compare_with_disprot: bool=True):
+def create_scores_plotly(sequence: str, scores_list: list[Score | None],
+    disprot_regions: pd.DataFrame,
+    dpr: list[tuple[int, int]],
+    dbd: list[tuple[int, int]],
+    compare_with_disprot: bool=True,
+    ):
     """
     Create a Plotly Figure for plotting the given list of scores.
 
-    :param str sequence: the sequence to plot (for x-axis labels)
+    :param str sequence: the sequence to plot (for x-axis labels).
     :param list[Score|None] scores_list: list of scores you wanna plot. `None`s are skipped. Refer to `make_score_renderable()`.
-    :param list[tuple[int, int]] dbd_ranges: list of (start, end) positions (1-based) for the DBD range.
-    :param pd.DataFrame disprot_regions: df with columns: `Region_Id`, `Start`, `End`
-    :param bool compare_with_disprot: whether to render DisProt compare bars below each graph
+    :param pd.DataFrame disprot_regions: df with columns: `Region_Id`, `Start`, `End`.
+    :param list[tuple[int, int]] dpr: list of (start, end) positions (1-based) for the DPR.
+    :param list[tuple[int, int]] dbd: list of (start, end) positions (1-based) for the DBD.
+    :param bool compare_with_disprot: whether to render DisProt compare bars below each graph.
     """
 
     CAP_LENGTH: Final = 0.25
@@ -103,19 +110,21 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
 
     #region Initialize plot
     fig = make_subplots(
-        rows=len(scores) + (1 if is_disprot_available else 0) + (1 if dbd_ranges else 0) + 1,
+        rows=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + (1 if dbd else 0) + 1,
         cols=1,
         shared_xaxes=True,
         row_heights=[
             *([10] * len(scores)), # weight `10` for each big graph
             *([1] if is_disprot_available else []), # small weight for DisProt row if it exists
-            *([1] if dbd_ranges else []), # small weight for DBD Ranges row if it exists
-            2,
+            *([1] if dpr else []), # DPR
+            *([1] if dbd else []), # small weight for DBD Ranges row if it exists
+            2, # sequence
         ],
         subplot_titles=[
             *[s.display_name for s in scores],
-            *(["DBD Range" + ("s" if len(dbd_ranges) > 1 else "")] if dbd_ranges else []),
             *(["DisProt"] if is_disprot_available else []),
+            *(["DPR" + ("s" if len(dpr) > 1 else "")] if dpr else []),
+            *(["DBD" + ("s" if len(dbd) > 1 else "")] if dbd else []),
             # "Sequence",
         ],
         font=dict(size=18),
@@ -125,7 +134,8 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         height=sum([
             125 * len(scores),
             50 if is_disprot_available else 0,
-            50 if dbd_ranges else 0,
+            50 if dpr else 0,
+            50 if dbd else 0,
             50,
         ]),
         margin=dict(l=20, r=20, t=20, b=20),
@@ -144,10 +154,9 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
     for row, score in enumerate(scores, start=1):
         # Plot main line
 
-        # hover_color = score.color
         hover_color = f"""color-mix(in srgb, currentcolor, {score.color} calc(100% * (
             sign(sign({ f'{score.threshold} - %{{y: }}' if score.is_downward else f'%{{y: }} - {score.threshold}' }) + 0.5) / 2 + 0.5
-        )))""" # basically "score.color above threshold, default color below threshold"
+        )))""" # basically "score.color when ≥ threshold, default color when < threshold" (and vice versa when score.is_downward... yea 👍)
 
         fig.add_trace(
             go.Scatter(
@@ -266,9 +275,9 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
 
     #endregion
 
-    #region DBD Ranges bars
-    if dbd_ranges:
-        for i, (start, end) in enumerate(dbd_ranges):
+    #region DPR bars
+    if dpr:
+        for i, (start, end) in enumerate(dpr):
             start = max(1, int(start))
             end = min(length, int(end))
             if end < start:
@@ -279,12 +288,48 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
                 go.Scatter(
                     x=xs,
                     y=[0] * len(xs),
-                    name="DBD Range",
+                    name="DPR",
+                    mode="lines", line=dict(color=COLOR_DPR, width=15),
+                    hovertemplate=f"DPR: {start}-{end}<extra></extra>",
+                    showlegend=(i == 0),
+                ),
+                row=len(scores) + (1 if is_disprot_available else 0) + 1,
+                col=1,
+            )
+
+        fig.update_yaxes(
+            showticklabels=False, showgrid=False, zeroline=False,
+            title_text="DPR", title_font=dict(size=12, color="grey"), title_standoff=0,
+            showline=True, linewidth=1,
+            range=[-0.1, 0.1],
+            fixedrange=True,
+            row=len(scores) + (1 if is_disprot_available else 0) + 1,
+            col=1,
+        )
+
+        fig.layout.annotations[len(scores) + (1 if is_disprot_available else 0) + 1 - 1].font.color = COLOR_DPR # type: ignore
+
+    #endregion
+
+    #region DBD bars
+    if dbd:
+        for i, (start, end) in enumerate(dbd):
+            start = max(1, int(start))
+            end = min(length, int(end))
+            if end < start:
+                continue
+
+            xs = list(range(start, end + 1))
+            fig.add_trace(
+                go.Scatter(
+                    x=xs,
+                    y=[0] * len(xs),
+                    name="DBD",
                     mode="lines", line=dict(color=COLOR_DBD, width=15),
                     hovertemplate=f"DBD: {start}-{end}<extra></extra>",
                     showlegend=(i == 0),
                 ),
-                row=len(scores) + 1,
+                row=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + 1,
                 col=1,
             )
 
@@ -294,11 +339,11 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             showline=True, linewidth=1,
             range=[-0.1, 0.1],
             fixedrange=True,
-            row=len(scores) + 1,
+            row=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + 1,
             col=1,
         )
 
-        fig.layout.annotations[len(scores) + 1 - 1].font.color = COLOR_DBD # type: ignore
+        fig.layout.annotations[len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + 1 - 1].font.color = COLOR_DBD # type: ignore
 
     #endregion
 
@@ -325,7 +370,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
                     hovertemplate=f"DisProt <span style='color: {COLOR_DISPROT}'>{region_id}</span>: {start_pos}-{end_pos}<extra></extra>",
                     showlegend=(i == 0),
                 ),
-                row=len(scores) + 1 + 1,
+                row=len(scores) + 1,
                 col=1,
             )
 
@@ -340,11 +385,11 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             linewidth=1,
             range=[-0.1, 0.1],
             fixedrange=True,
-            row=len(scores) + 1 + 1,
+            row=len(scores) + 1,
             col=1,
         )
 
-        fig.layout.annotations[len(scores) + 1 + 1 - 1].font.color = COLOR_DISPROT # type: ignore
+        fig.layout.annotations[len(scores) + 1 - 1].font.color = COLOR_DISPROT # type: ignore
 
         # For each score row, add "in DisProt + above threshold" highlight segments
         for row, score in enumerate(scores if compare_with_disprot else [], start=1):
@@ -400,7 +445,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
             hoverinfo="skip",
             hovertemplate=f"Residue: %{{text}}<extra></extra>",
         ),
-        row=len(scores) + (1 if is_disprot_available else 0) + 1 + (1 if dbd_ranges else 0),
+        row=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + (1 if dbd else 0) + 1,
         col=1,
     )
 
@@ -415,7 +460,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         linewidth=1,
         range=[-0.5, 0.5],
         fixedrange=True,
-        row=len(scores) + (1 if is_disprot_available else 0) + 1 + (1 if dbd_ranges else 0),
+        row=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + (1 if dbd else 0) + 1,
         col=1,
     )
 
@@ -423,7 +468,7 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None], dbd_ran
         showgrid=False,
         showline=True,
         linewidth=1,
-        row=len(scores) + (1 if is_disprot_available else 0) + 1 + (1 if dbd_ranges else 0),
+        row=len(scores) + (1 if is_disprot_available else 0) + (1 if dpr else 0) + (1 if dbd else 0) + 1,
         col=1,
     )
 

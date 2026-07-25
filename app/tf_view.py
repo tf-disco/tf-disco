@@ -47,7 +47,8 @@ if ("genus_num" not in st.query_params) or (tf_row is None):
 tf_genus_num: str = tf_row["Genus_Num"].strip()
 tf_uniprot: str = tf_row["Uniprot_Acc"].strip()
 tf_genus_name: str = tf_row["Genus_Name"].strip()
-tf_dbd_range: str = tf_row["Dbd_Range"].strip()
+tf_dbd: str = tf_row["DBD"].strip()
+tf_dpr: str = tf_row["DPR"].strip()
 tf_sequence: str = sequence_dict[tf_genus_num].Sequence
 st.set_page_config(page_title=f"{tf_genus_name} | {constants.APP_NAME}")
 
@@ -60,7 +61,8 @@ tf_matches = matches_df[matches_df["Genus_Num"] == tf_genus_num]
 """Matches occurring ONLY in this TF."""
 
 # Parse the DBD range string into a list of (start, end) tuples (used for plotting in the graph)
-tf_dbd_range_list = helper.parse_dbd_ranges(tf_dbd_range)
+tf_dbd_list = helper.parse_range_str(tf_dbd)
+tf_dpr_list = helper.parse_range_str(tf_dpr)
 
 #endregion
 
@@ -71,12 +73,13 @@ with st.sidebar:
 # TF metrics cards
 st.title(f"{tf_genus_num} | {tf_genus_name}", anchor="selected_tf")
 
-col11, col12 = st.columns(2, border=True)
+col11, col12, col13 = st.columns(3, border=True)
 col21, col22 = st.columns(2, border=True)
 col11.metric(":material/link: UniProt Accession", f"**[{tf_uniprot}](https://www.uniprot.org/uniprotkb/{tf_uniprot}/entry)**", help="The unique identifier for this transcription factor in the UniProt database.")
 col12.metric(":material/error_med: DisProt ID", f"**[{tf_disprot_id}](https://disprot.org/{tf_disprot_id})**" if not tf_disprot_regions.empty else "N/A", help="The unique identifier for this transcription factor in the DisProt database. Click the link to view more details about the disordered regions in this TF.")
-col21.metric(":material/straighten: Sequence length", f"**{len(tf_sequence)} residues**", help="The number of amino acids in this transcription factor's sequence.")
-col22.metric(":material/format_list_numbered: DNA Binding Domain" + ("s" if len(tf_dbd_range_list)!=1 else ""), f"**{tf_dbd_range}**" if tf_dbd_range else "N/A", help="The range of amino acids that correspond to the DNA-binding domain (DBD) of this transcription factor. This is the region that interacts with DNA to regulate gene expression.")
+col13.metric(":material/straighten: Sequence length", f"**{len(tf_sequence)} residues**", help="The number of amino acids in this transcription factor's sequence.")
+col21.metric(":material/format_list_numbered: DNA Binding Domain" + ("s" if len(tf_dbd_list)!=1 else ""), f"**{tf_dbd}**" if tf_dbd else "N/A", help="The range of amino acids that correspond to the DNA-binding domains (DBD) of this transcription factor. This is the region that interacts with DNA to regulate gene expression.")
+col22.metric(":material/water_drop: Droplet-Promoting Region" + ("s" if len(tf_dpr_list)!=1 else ""), f"**{tf_dpr}**" if tf_dpr else "N/A", help="The range of amino acids that correspond to the Droplet-Promoting Regions (DPR) of this transcription factor.") # TODO: helptext explaining what a DPR does, just like above metric
 
 #endregion
 
@@ -200,6 +203,7 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
 
     compare_with_disprot = st.toggle(
         label=f'Compare scores with :color[DisProt]{{foreground="{graph.COLOR_DISPROT}"}} regions',
+        disabled=tf_disprot_regions.empty,
         help="Enable this to plot a bar below the graph of each score.\n\nIt marks wherever a region is identified as disordered by DisProt AND where the score says it's disordered.",
     )
 
@@ -210,8 +214,9 @@ with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
             for score_name in score_names_all
             if score_name in score_names_selected
         ],
-        dbd_ranges=tf_dbd_range_list,
         disprot_regions=tf_disprot_regions,
+        dpr=tf_dpr_list,
+        dbd=tf_dbd_list,
         compare_with_disprot=compare_with_disprot,
     )
     st.plotly_chart(fig)
@@ -266,17 +271,18 @@ with st.expander("Matches in Eukaryotic Linear Motif (ELM) patterns for selected
     st.table(
         data=pd.concat({
             "ELM Accession": (tf_matches["ELM_Acc"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
-            "ELM ID": (tf_matches["ELM_Id"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
+            # "ELM ID": (tf_matches["ELM_Id"].apply(lambda x: f"[{x}](http://elm.eu.org/elms/{x})")),
             "Regex": (tf_matches["Regex"].apply(lambda x: f"`{x}`")),
             "": pd.Series([]),
             "Matched Sequence": (tf_matches["Matched_Sequence"].astype(str)),
             "Start": (tf_matches["Start"].astype(str)),
             "End": (tf_matches["End"].astype(str)),
+            f':color[DPR]{{foreground="{graph.COLOR_DPR}"}}': (tf_matches["Fuzdrop-Dpr"].astype(str)),
+            f':color[Domain]{{foreground="{graph.COLOR_DBD}"}}': (tf_matches["Domain"].astype(str)),
             **{
                 f':color[{graph.SCORE_PROPERTIES[name].display_name}]{{foreground="{graph.SCORE_PROPERTIES[name].color}"}}': (tf_matches[name].astype(str))
                 for name in cast(list[graph.ScoreName], ["Aiupred-Disorder", "Fldpnn-Disorder", "Metapredict-Disorder"])
             },
-            f':color[Domain]{{foreground="{graph.COLOR_DBD}"}}': (tf_matches["Domain"].astype(str)),
         }, axis=1),
         hide_index=True,
         height=500 if len(tf_matches) > 5 else "content",

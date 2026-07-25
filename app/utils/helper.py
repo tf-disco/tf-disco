@@ -53,15 +53,15 @@ def get_df_selected_rows(state: streamlit.elements.arrow.DataframeState) -> list
     if "rows" not in state["selection"]: return []
     return state["selection"]["rows"]
 
-def parse_dbd_ranges(dbd_range_str: str) -> list[tuple[int, int]]:
-    """Parse the DBD range string into a list of (start, end) tuples.
+def parse_range_str(range_str: str) -> list[tuple[int, int]]:
+    """Parse any range string into a list of (start, end) tuples.
 
-    :param dbd_range_str: The DBD range string, e.g. "10-20,30-40"
+    :param range_str: The range string, e.g. "10-20,30-40"
     :return: A list of (start, end) tuples, e.g. [(10, 20), (30, 40)]
     """
 
     ranges = []
-    for part in dbd_range_str.split(","):
+    for part in range_str.split(","):
         part = part.strip()
         if not part: continue
         try:

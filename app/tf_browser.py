@@ -75,7 +75,7 @@ catalog_filt__dependencies: str = "-".join(map(str, [
     st.session_state.get("sidebar_cart__trigger", 0),
 ]))
 catalog_filt__state = st.dataframe(
-    data=catalog_filt[["Genus_Num", "Uniprot_Acc", "Genus_Name", "Dbd_Range", "Disprot_Perc"]],
+    data=catalog_filt[["Genus_Num", "Uniprot_Acc", "Genus_Name", "DBD", "Disprot_Perc"]],
     selection_default={"selection": {"rows":
         catalog_filt.index[catalog_filt["Genus_Num"].isin(cart)].tolist()
     }},
@@ -83,7 +83,7 @@ catalog_filt__state = st.dataframe(
         "Genus_Num": "Genus Number",
         "Uniprot_Acc": "UniProt Accession",
         "Genus_Name": "Genus Name",
-        "Dbd_Range": "DNA Binding Domains (DBD)",
+        "DBD": "DNA Binding Domains (DBD)",
         # "Disprot_Available": "DisProt data available?",
         "Disprot_Perc": st.column_config.ProgressColumn("Disordered content (as per DisProt)", min_value=0.0, max_value=1.0,),
     },
