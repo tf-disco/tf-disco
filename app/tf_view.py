@@ -104,36 +104,18 @@ st.divider()
 
 with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
     st.subheader("Sequence", anchor=False)
-
-    VHide = Literal[":material/visibility_off: Hide"]
-    VShow = Literal[":material/visibility: Show"]
-    V_HIDE: VHide = ":material/visibility_off: Hide"
-    V_SHOW: VShow = ":material/visibility: Show"
-
-    with st.popover(label="Annotations"):
-        annotations_dbd = st.pills(
-            label="DBD regions:",
-            selection_mode="single",
-            required=True,
-            default=V_HIDE,
-            options=[V_HIDE, V_SHOW],
-        ) != V_HIDE
-        st.write("Displays a **Black/White** overline above the residues which are part of DNA Binding Domains.")
-        annotations_disorder = cast(graph.ScoreName|VHide, st.pills(
-            label="Disorder predictors:",
-            selection_mode="single",
-            required=True,
-            default=V_HIDE,
-            options=[V_HIDE, "Aiupred-Disorder", "Fldpnn-Disorder", "Metapredict-Disorder"],
-            format_func=lambda score_name: graph.SCORE_PROPERTIES[score_name].display_name if score_name != V_HIDE else V_HIDE,
-        ))
-        st.write("Displays a :red[**Red**] underline for residues predicted to be disordered by the selected predictor.")
+    overline_type, overline_color, underline_type, underline_color = helper.render_annotations_popover()
 
 st.write(helper.render_sequence(
     sequence=tf_sequence,
     pattern=selected_pattern,
-    dbd_ranges=helper.convert_ranges_to_array(tf_dbd_range_list, len(tf_sequence)) if annotations_dbd else None,
-    disorder_scores=tf_disorder_scores[annotations_disorder]>=(graph.SCORE_PROPERTIES[annotations_disorder].threshold) if annotations_disorder != V_HIDE else None,
+    pattern_tooltip=True,
+    overline_residues=helper.convert_ranges_to_array(tf_dbd_list if overline_type == "DBD" else (tf_dpr_list if overline_type == "DPR" else []), len(tf_sequence)),
+    overline_color=overline_color,
+    overline_tooltip=f"In {overline_type} region" if overline_type else None,
+    underline_residues=tf_disorder_scores[underline_type] >= graph.SCORE_PROPERTIES[underline_type].threshold if underline_type else None,
+    underline_color=underline_color,
+    underline_tooltip=graph.SCORE_PROPERTIES[underline_type].display_name if underline_type else None,
 ), unsafe_allow_html=True)
 
 sequence_fasta = f">{tf_genus_num}_{tf_uniprot}_{tf_genus_name}\n{tf_sequence}\n"
@@ -172,7 +154,7 @@ score_names_default: list[graph.ScoreName] = [
     "Fldpnn-Disorder",
     "Metapredict-Disorder",
 ]
-# persist selection across navigations
+# persist selection across navigation
 with st.expander("Score Plots", icon=":material/area_chart:", expanded=True):
     with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="right"):
         st.subheader("Score Plots", anchor=False)

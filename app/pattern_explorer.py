@@ -244,56 +244,77 @@ else:
             st.subheader(f"Matches for pattern `{patterns__sel_pattern}`", anchor=False)
 
             st.write("Download:")
-            st.download_button(
-                label=":material/download: HTML",
-                data=(lambda genus_nums,pattern,selected_pattern_df: (lambda:
-                    helper.render_sequences_multiple_html(genus_nums=genus_nums, pattern=pattern, selected_pattern_df=selected_pattern_df, theme="light").encode("utf-8")
-                ))(genus_nums, patterns__sel_pattern, selected_pattern_df),
-                # data=helper.render_sequences_matches(genus_nums, patterns__sel_pattern, selected_pattern_df, "light").encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.html",
-                mime="text/html",
-            )
+            html_download_placeholder = st.empty()
+            html_download_placeholder.button(":material/download: HTML", disabled=True) #disabled button placeholder
             st.download_button(
                 label=":material/download: TSV",
                 data=selected_pattern_matches_df.to_csv(index=False, sep="\t").encode("utf-8"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.tsv",
+                file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} matches.tsv",
                 mime="text/tab-separated-values",
             )
             st.download_button(
                 label=":material/download: CSV",
                 data=selected_pattern_matches_df.to_csv(index=False).encode("utf-8-sig"),
-                file_name=f"pattern_{patterns__sel_elm_acc}_matches.csv",
+                file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} matches.csv",
                 mime="text/csv",
             )
 
-        TFS_PER_PAGE = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
-        NUM_PAGES = max(1, ceil(len(genus_nums) / TFS_PER_PAGE))
+        with st.container(width="stretch", horizontal=True, horizontal_alignment="distribute", vertical_alignment="bottom"):
+            tfs_per_page = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
+            overline_type, overline_color, underline_type, underline_color = helper.render_annotations_popover()
+        num_pages = max(1, ceil(len(genus_nums) / tfs_per_page))
 
         page_top = st.pagination(
-            num_pages=NUM_PAGES,
+            num_pages=num_pages,
             max_visible_pages=20,
             key="pagination_top",
             width="stretch",
             on_change=lambda: st.session_state.update({"pagination_bottom": st.session_state.get("pagination_top", 1)})
-        )-1 if NUM_PAGES > 1 else 0
+        )-1 if num_pages > 1 else 0
 
-        for genus_num in genus_nums[page_top*TFS_PER_PAGE:(page_top+1)*TFS_PER_PAGE]:
-            tf_info = sequence_dict.get(genus_num, data_loading.TFInfo(Uniprot_Acc="", Genus_Name="", Sequence=""))
-            observed_matches_count = selected_pattern_df[selected_pattern_df["Genus_Num"] == genus_num]["Observed"].sum()
+        st.markdown(helper.render_sequences_multiple_html(
+            genus_nums=genus_nums[page_top*tfs_per_page:(page_top+1)*tfs_per_page],
+            pattern=patterns__sel_pattern,
+            selected_pattern_df=selected_pattern_df,
+            tooltips=True,
+            overline_type=overline_type,
+            overline_color=overline_color,
+            underline_type=underline_type,
+            underline_color=underline_color,
+            render_pattern_heading=False,
+            make_relative_link=True,
+        ), unsafe_allow_html=True)
 
-            st.divider()
-            st.subheader(f"Matches for [{tf_info.Uniprot_Acc}](https://uniprot.org/entry/{tf_info.Uniprot_Acc}) | genus {genus_num} | {tf_info.Genus_Name}", anchor=False)
-            st.write(f"Observed Matches: {observed_matches_count}")
-            st.markdown(helper.render_sequence(sequence=tf_info.Sequence, pattern=patterns__sel_pattern), unsafe_allow_html=True)
-            st.space(size="small")
+        html_download_filename_extras: list[str] = []
+        if overline_type: html_download_filename_extras.append(overline_type)
+        if underline_type: html_download_filename_extras.append(underline_type)
+        html_download_filename_extras_str = (" (" + ", ".join(html_download_filename_extras) + ")") if html_download_filename_extras else ""
+        html_download_placeholder.download_button(
+            label=":material/download: HTML",
+            data=(lambda genus_nums,pattern,selected_pattern_df,overline_type,overline_color,underline_type,underline_color: (lambda:
+                helper.render_sequences_multiple_html(
+                    genus_nums=genus_nums, pattern=pattern,
+                    selected_pattern_df=selected_pattern_df,
+                    tooltips=False,
+                    overline_type=overline_type,
+                    overline_color=overline_color,
+                    underline_type=underline_type,
+                    underline_color=underline_color,
+                    make_relative_link=False,
+                ).encode("utf-8")
+            ))(genus_nums, patterns__sel_pattern, selected_pattern_df, overline_type, overline_color, underline_type, underline_color),
+            # data=helper.render_sequences_matches(genus_nums, patterns__sel_pattern, selected_pattern_df, "light").encode("utf-8"),
+            file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} matches{html_download_filename_extras_str}.html",
+            mime="text/html",
+        )
 
         page_bot = st.pagination(
-            num_pages=NUM_PAGES,
+            num_pages=num_pages,
             max_visible_pages=20,
             key="pagination_bottom",
             width="stretch",
             on_change=lambda: st.session_state.update({"pagination_top": st.session_state.get("pagination_bottom", 1)})
-        )-1 if NUM_PAGES > 1 else 0
+        )-1 if num_pages > 1 else 0
 
     #endregion
 
