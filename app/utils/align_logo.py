@@ -16,7 +16,6 @@ from typing import Final
 import streamlit as st
 import pandas as pd
 from Bio import AlignIO
-from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont, ImageChops
 
 from . import constants
@@ -152,11 +151,10 @@ def trim_edges(image: Image.Image, trim_color=(255,255,255)) -> Image.Image:
     else: return image
 
 @st.cache_resource(show_spinner="Generating data for logo...")
-def get_characters_bitmaps(fontname: str="Consolas", size: int=500) -> dict[str, Image.Image]:
+def get_characters_bitmaps(size: int=500) -> dict[str, Image.Image]:
     """Get bitmaps for all amino acid characters."""
 
-    filepath = font_manager.findfont(font_manager.FontProperties(family=fontname))
-    font = ImageFont.FreeTypeFont(font=filepath, size=size)
+    font = ImageFont.FreeTypeFont(font=constants.PATH_ASSET_SEQLOGO_FONT, size=size)
 
     char_bitmaps: dict[str, Image.Image] = {}
     for char in AMINO_ACIDS:
@@ -171,11 +169,10 @@ def get_characters_bitmaps(fontname: str="Consolas", size: int=500) -> dict[str,
 
     return char_bitmaps
 
-def create_logo(aligned_sequences: list[str], font_name: str="serif", size: tuple[int,int]=(500, 300), gap: int=2, prob_threshold: float=0.025):
+def create_logo(aligned_sequences: list[str], size: tuple[int,int]=(500, 300), gap: int=2, prob_threshold: float=0.025):
     """Create a logo from the aligned sequences, rendered using PIL.
 
     :param aligned_sequences: List of sequences.
-    :param font_name: Name of the font to use.
     :param size: Size of the output image, in pixels.
     :param gap: Gap around characters, in pixels.
     :param prob_threshold: Minimum probability for a character to be included in a column.
@@ -187,7 +184,7 @@ def create_logo(aligned_sequences: list[str], font_name: str="serif", size: tupl
     image_height = size[1] - gap
     image = Image.new("RGB", (image_width + gap, image_height + gap), (255,255,255))
 
-    char_bitmaps = get_characters_bitmaps(font_name)
+    char_bitmaps = get_characters_bitmaps()
 
     w_max = max(1, floor(image_width / len(pwm_matrix)))
     for col_num, chars in enumerate(pwm_matrix.itertuples(index=False)):

@@ -46,14 +46,19 @@ ENV_MUSCLE_PATH: Final = (PATH_ROOT / __MUSCLE_PATH).resolve() if __MUSCLE_PATH 
 
 #endregion
 
-
-#region Page paths
+#region Assets
 PATH_ASSET_LOGO: Final = PATH_ROOT / "assets/logo.png"
 """Path to the logo, 534x534."""
 
 ASSET_LOGO_DATAURI: Final = f"data:image/png;base64,{b64encode(PATH_ASSET_LOGO.read_bytes()).decode('utf-8')}"
 """Data URI for the logo, used for embedding the logo in markdown."""
 
+PATH_ASSET_SEQLOGO_FONT: Final = PATH_ROOT / "assets/DejaVuSerif.ttf"
+"""Path to the font used for rendering text in images."""
+
+#endregion
+
+#region Page paths
 PATH_PAGE_HOME: Final = PATH_ROOT / "app/home.py"
 """Path to the **Home** page."""
 

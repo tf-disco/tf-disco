@@ -212,7 +212,6 @@ else:
             size = (150 * len(aligned_sequences[0]), 400)
             img = align_logo.create_logo(
                 aligned_sequences=aligned_sequences,
-                font_name="serif",
                 size=size,
                 prob_threshold=0.025,
             )
