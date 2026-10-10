@@ -206,7 +206,7 @@ else:
 
     col1.metric("ELM Accession", f"[{selected_pattern_df['ELM_Acc'][0]}](http://elm.eu.org/{selected_pattern_df['ELM_Acc'][0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern accession number, which uniquely identifies the pattern in the ELM database.")
     col2.metric("ELM ID", f"[{selected_pattern_df['ELM_Id'][0]}](http://elm.eu.org/elms/{selected_pattern_df['ELM_Id'][0]})", border=True, help="The ELM (Eukaryotic Linear Motif) pattern ID, which uniquely identifies the pattern in the ELM database.")
-    col3.metric("Observed Matches" + (" (in cart)" if filt_to_cart else ""), selected_pattern_df["Observed"].sum(), border=True, help="The number of matches of the pattern across all species.")
+    col3.metric("Observed Matches" + (" (in cart)" if filt_to_cart else ""), selected_pattern_df["Observed"].sum(), border=True, help="The total number of matches of the ELM pattern across all the TFs" + (" (in cart)" if filt_to_cart else "") + ".")
 
     @st.fragment(parallel=True)
     def pattern_logo_fragment(sequences: list[str]):

@@ -185,7 +185,8 @@ following can be done:
 CONTENT_HELP_TF_VIEWER: Final = f"""
 This page shows the information of the selected TF. Basic info such as
 UniProt accession number, DisProt ID (if exists), length of sequence, and the
-ranges of positions marked as DNA Binding Domains (DBD) is shown.
+ranges of positions marked as DNA Binding Domains (DBD) and Droplet-Promoting
+Regions (DPR) are shown.
 
 The sequence is rendered 10-residue-long blocks. The sequence can be downloaded
 in the FASTA format, if desired. There are two types of annotations which can be
