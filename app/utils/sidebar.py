@@ -88,7 +88,12 @@ def render_pattern_selector(matches: pd.DataFrame, selected_genus_num: str) -> t
 
     max_penalty_at_20 = helper.render_vagueness_penalty_slider()
     vagueness_penalty_func = patterns.make_vagueness_penalty_func(max_penalty_at_20)
-    patterns_df = patterns.compute_pattern_scores(matches, data_loading.init().sequence_dict, vagueness_penalty_func)
+    patterns_df = patterns.compute_pattern_scores(
+        matches_df=matches,
+        sequence_dict=data_loading.init().sequence_dict,
+        vagueness_penalty_func=vagueness_penalty_func,
+        remove_patterns_with_one_match=False,
+    )
 
     patterns__state = st.dataframe(
         patterns_df[["Regex", "Observed", "ZScore", "Log2FC"]],

@@ -109,7 +109,12 @@ with st.expander(f"Select Patterns", icon=":material/view_timeline:", expanded=T
         )
 
     patterns_count_total = matches_df["ELM_Acc"].nunique()
-    patterns_df = patterns.compute_pattern_scores(matches_filtered, sequence_dict, vagueness_penalty_func)
+    patterns_df = patterns.compute_pattern_scores(
+        matches_df=matches_filtered,
+        sequence_dict=sequence_dict,
+        vagueness_penalty_func=vagueness_penalty_func,
+        remove_patterns_with_one_match=False,
+    )
     score_min = patterns_df["Log2FC"].min()
     score_max = patterns_df["Log2FC"].max()
 

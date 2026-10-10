@@ -337,14 +337,16 @@ def compute_pattern_scores(
     matches_df: pd.DataFrame,
     sequence_dict: dict[str, TFInfo],
     vagueness_penalty_func: VaguenessPenaltyFunction=make_vagueness_penalty_func(1.0),
+    remove_patterns_with_one_match: bool=False,
 ) -> pd.DataFrame:
     """Compute vagueness score, expected matches, and Z-score for each pattern.
 
     Args:
         matches_df (pd.DataFrame): DataFrame with column `ELM_Acc` (observed match rows)
-        fasta_path (Path): Path to FASTA file, used to compute total sequence length.
+        sequence_dict (dict[str, TFInfo]): Dictionary mapping genus numbers to TFInfo objects.
         save_file (Path | None): Optional path to save the results as TSV.
-        vagueness_penalty_func: A function which penalizes wildcards and long character classes. A wildcard is thought of as a char class with length=20.
+        vagueness_penalty_func ((float) -> float): A function which penalizes wildcards and long character classes. A wildcard is thought of as a char class with length=20.
+        remove_patterns_with_one_match (bool): If True, patterns with ≤ 1 observed match will be removed.
     Returns:
         pd.DataFrame: DataFrame with columns: `ELM_Acc`, `ELM_Id`, `Regex`,
             `Vagueness`, `Expected`, `Observed`, `ZScore`, `Log2FC`
@@ -362,6 +364,8 @@ def compute_pattern_scores(
     observed = matches_df.groupby("ELM_Acc").size().rename("Observed")
     scores = scores.join(observed, how="left", on="ELM_Acc")
     scores["Observed"] = scores["Observed"].fillna(0).astype(int)
+    if remove_patterns_with_one_match:
+        scores = scores[scores["Observed"] > 1]
     if len(scores) > 0:
         scores = scores.merge(
             matches_df.groupby("ELM_Acc").apply(lambda x: x["Genus_Num"].nunique()).rename("NumTFs").reset_index(drop=False),
