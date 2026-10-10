@@ -351,8 +351,8 @@ def create_scores_plotly(sequence: str, scores_list: list[Score | None],
     if is_disprot_available: # DisProt track (bottom row) + build mask for overlaps
         disprot_mask = np.zeros(length, dtype=bool)
         for i, (region_id, start_pos, end_pos) in enumerate(disprot_regions[["Region_Id", "Start", "End"]].itertuples(index=False, name=None)):
-            start_pos = max(0, int(start_pos))
-            end_pos = min(length - 1, int(end_pos))
+            start_pos = max(1, int(start_pos))
+            end_pos = min(length, int(end_pos))
             if end_pos < start_pos:
                 continue
 
