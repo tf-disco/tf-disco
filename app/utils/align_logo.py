@@ -23,9 +23,6 @@ from . import constants
 # ============================================================================ #
 
 #region Muscle
-# URL: Final = "https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.gz"
-URL: Final = "https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
-
 def get_muscle_path() -> Path:
     try:
         muscle_path: Path|None = st.session_state.muscle_path
@@ -42,7 +39,7 @@ def get_muscle_path() -> Path:
     print("Downloading MUSCLE from GitHub...", flush=True)
     with st.spinner("Loading MUSCLE. This shouldn't take too long...", show_time=True):
         try:
-            muscle_path_str, _ = urllib.request.urlretrieve(URL)
+            muscle_path_str, _ = urllib.request.urlretrieve(constants.URL_MUSCLE_LINUX)
             muscle_path = Path(muscle_path_str)
         except:
             raise IOError("Failed to download MUSCLE.")

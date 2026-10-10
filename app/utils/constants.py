@@ -53,6 +53,9 @@ PATH_ASSET_LOGO: Final = PATH_ROOT / "assets/logo.png"
 ASSET_LOGO_DATAURI: Final = f"data:image/png;base64,{b64encode(PATH_ASSET_LOGO.read_bytes()).decode('utf-8')}"
 """Data URI for the logo, used for embedding the logo in markdown."""
 
+URL_MUSCLE_LINUX: Final = "https://github.com/tf-disco/muscle/releases/download/v5.3/muscle-linux-x86.v5.3"
+"""URL to the MUSCLE binary for Linux."""
+
 PATH_ASSET_SEQLOGO_FONT: Final = PATH_ROOT / "assets/DejaVuSerif.ttf"
 """Path to the font used for rendering text in images."""
 
