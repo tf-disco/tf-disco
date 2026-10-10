@@ -81,12 +81,8 @@ def __load_disprot_tfclasses_dfs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str
     dbd_df = pd.read_csv(constants.PATH_DATA.TF_DBD, sep="\t")
     dpr_df = pd.read_csv(constants.PATH_DATA.TF_DPR, sep="\t")
 
-    disprot_df = disprot_df.sort_values(by=["Uniprot_Acc", "Start", "End"], ascending=True).reset_index(drop=True)
-
-    # for each row (tf), `genus_num_parts` is a list of ints.
     # 1. sort on genus number
-    tfclasses_df["Genus_Num_Parts"] = tfclasses_df["Genus_Num"].str.split(".").map(lambda parts: [int(part) for part in parts]) # type:ignore
-    tfclasses_df = tfclasses_df.sort_values(by="Genus_Num_Parts")
+    tfclasses_df = tfclasses_df.sort_values(by="Genus_Num", key=lambda series: series.map(helper.genus_sort_key))
     tfclasses_df[["Superclass", "Class", "Family", "Subfamily"]] = tfclasses_df[["Superclass", "Class", "Family", "Subfamily"]].astype(str).fillna("")
 
     # 2. create title column

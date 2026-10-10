@@ -72,6 +72,25 @@ def parse_range_str(range_str: str) -> list[tuple[int, int]]:
             continue
     return ranges
 
+def genus_sort_key(genus_num: str, handle_zero: bool=True):
+    """Split the given genus-number string into its parts. Useful for sorting.
+
+    :param handle_zero: It is observed in the TFClass website that `0` is placed
+        *after* the other numbers, instead of at the start. Set to `True` to
+        respect this sorting logic.
+    """
+
+    key = list(map(int,
+        genus_num.splitlines()[0].split(".")
+    ))
+    if handle_zero:
+        key = [
+            float("inf") if part == 0 else part
+            for part in key
+        ]
+    return tuple(key)
+
+
 #endregion
 
 # ============================================================================ #
