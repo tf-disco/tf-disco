@@ -1,15 +1,17 @@
 ARG dataset_source=kaggle
 
 FROM python:3.13-slim AS base
-    COPY . /tf-disco
-    WORKDIR /tf-disco
-
     # image metadata
     LABEL org.opencontainers.image.description="Docker image for the TF-DISCO Browser"
     LABEL org.opencontainers.image.authors="Sreenikethan Iyer, Joseph Cijo"
     LABEL org.opencontainers.image.documentation="https://github.com/tf-disco/tf-disco/blob/main/README.md"
 
+    ENV IS_DOCKER=1
+
     # uv, because pip is slow
+    COPY pyproject.toml /tf-disco/
+    COPY uv.lock /tf-disco/
+    WORKDIR /tf-disco
     ENV UV_PROJECT_ENVIRONMENT=/usr/local
     RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/uv ["/uv", "sync"]
 
@@ -18,7 +20,8 @@ FROM python:3.13-slim AS base
     RUN chmod +x /tf-disco-deps/muscle
     ENV MUSCLE_PATH=/tf-disco-deps/muscle
 
-    ENV IS_DOCKER=1
+    # copy code
+    COPY . /tf-disco
 
     # datatset shenanigans
     FROM base AS stage_copy
