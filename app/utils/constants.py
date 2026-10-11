@@ -83,7 +83,7 @@ PATH_PAGE_HELP: Final = PATH_ROOT / "app/about_help.py"
 #endregion
 
 #region Dataset
-KAGGLE_HANDLE: Final = "joejojoestar/tf-disco-datasets/versions/4"
+KAGGLE_HANDLE: Final = "joejojoestar/tf-disco-datasets/versions/9"
 """The Kaggle handle for the datasets."""
 
 class PathData:
