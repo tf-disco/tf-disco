@@ -139,7 +139,7 @@ class TFInfo(NamedTuple):
     Sequence: str
 # @st.cache_data(show_spinner="Loading fasta file...")
 def __load_fasta() -> dict[str, TFInfo]:
-    """Load the FASTA file and return a mapping from UniProt accession to sequence."""
+    """Load the FASTA file and return a mapping from Genus Number to `TFInfo` object."""
     sequence_dict = {}
     with open(constants.PATH_DATA.TF_FASTA, encoding="utf-8") as handle:
         records = list(FastaIterator(handle))

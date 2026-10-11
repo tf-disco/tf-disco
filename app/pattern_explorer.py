@@ -262,6 +262,16 @@ else:
                 file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} matches.csv",
                 mime="text/csv",
             )
+            fastas = []
+            for genus_num in genus_nums:
+                tf_info = sequence_dict[genus_num]
+                fastas.append(f">{genus_num}_{tf_info.Uniprot_Acc}_{tf_info.Genus_Name}\n{tf_info.Sequence}")
+            st.download_button(
+                label=":material/download: FASTA",
+                data="\n\n".join(fastas) + "\n",
+                file_name=f"{constants.APP_NAME} - pattern {patterns__sel_elm_acc} TFs.fasta",
+                mime="text/plain",
+            )
 
         with st.container(width="stretch", horizontal=True, horizontal_alignment="distribute", vertical_alignment="bottom"):
             tfs_per_page = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
