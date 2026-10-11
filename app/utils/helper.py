@@ -386,6 +386,21 @@ def render_annotations_popover():
         cast(str, underline_color),
     )
 
+def render_sort_tfs_popover() -> Literal["genus_num_asc", "matches_desc"]:
+    """Render a popover for selecting the sort option."""
+    with st.popover(":material/sort: Sort TFs"):
+        sort_option: Literal["genus_num_asc", "matches_desc"] = st.radio(
+            label="Sort TFs by:",
+            options=["genus_num_asc", "matches_desc"],
+            format_func=lambda option: {
+                "genus_num_asc": ":primary[:material/sort_by_alpha:] by Genus Number (ascending)",
+                "matches_desc": ":primary[:material/123:] by number of observed matches (descending)",
+            }.get(option, option),
+            label_visibility="collapsed",
+        )
+
+    return sort_option
+
 # ============================================================================ #
 
 def render_vagueness_penalty_slider(key: str|None=None):

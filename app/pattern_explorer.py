@@ -276,6 +276,11 @@ else:
         with st.container(width="stretch", horizontal=True, horizontal_alignment="distribute", vertical_alignment="bottom"):
             tfs_per_page = st.selectbox("TFs per page:", options=[5, 10, 20], filter_mode=None) if len(genus_nums) > 5 else len(genus_nums)
             overline_type, overline_color, underline_type, underline_color = helper.render_annotations_popover()
+            sort_option = helper.render_sort_tfs_popover()
+            if sort_option == "genus_num_asc": genus_nums.sort(key=helper.genus_sort_key)
+            elif sort_option == "matches_desc": pass # already sorted at start
+            else: print("[WARNING] Unknown sort option:", sort_option)
+
         num_pages = max(1, ceil(len(genus_nums) / tfs_per_page))
 
         page_top = st.pagination(
